@@ -76,7 +76,7 @@ impl EncryptedCommand {
     /// encrypted message is wrapped in an outer standard SSP message.
     ///
     /// Matryoshka dolls all the way down...
-    pub fn set_message_data<M: CommandOps>(&mut self, message: &mut M) -> Result<()> {
+    pub fn set_message_data(&mut self, message: &mut dyn CommandOps) -> Result<()> {
         let len = message.data_len();
 
         if message.data().len() != len {

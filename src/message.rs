@@ -139,6 +139,25 @@ pub trait MessageOps {
         self.buf_mut()[start..end].as_mut()
     }
 
+    fn set_data(&mut self, data: &[u8]) -> Result<()> {
+        let len = data.len();
+        let max_len = self.buf().len() - self.metadata_len();
+
+        if self.is_variable() {
+            if !(1..=max_len).contains(&len) {
+                return Err(Error::InvalidDataLength((len, max_len)));
+            }
+
+            self.set_data_len(len as u8);
+        } else if len != self.data_len() {
+            return Err(Error::InvalidDataLength((len, self.data_len())));
+        }
+
+        self.data_mut().copy_from_slice(data);
+
+        Ok(())
+    }
+
     /// Toggles the value of the [SequenceFlag](crate::SequenceFlag).
     fn toggle_sequence_flag(&mut self) {
         let mut seq_id = SequenceId::from(self.buf()[index::SEQ_ID]);

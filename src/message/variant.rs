@@ -49,8 +49,82 @@ pub enum MessageVariant {
 }
 
 impl MessageVariant {
+    pub fn new(msg_type: MessageType) -> Self {
+        match msg_type {
+            MessageType::SetInhibits => Self::SetInhibitsResponse(SetInhibitsResponse::new()),
+            MessageType::ChannelValueData => Self::ChannelValueDataResponse(ChannelValueDataResponse::new()),
+            MessageType::ConfigureBezel => Self::ConfigureBezelResponse(ConfigureBezelResponse::new()),
+            MessageType::Disable => Self::DisableResponse(DisableResponse::new()),
+            MessageType::DisplayOff => Self::DisplayOffResponse(DisplayOffResponse::new()),
+            MessageType::DisplayOn => Self::DisplayOnResponse(DisplayOnResponse::new()),
+            MessageType::Empty => Self::EmptyResponse(EmptyResponse::new()),
+            MessageType::EncryptionReset => Self::EncryptionResetResponse(EncryptionResetResponse::new()),
+            MessageType::Enable => Self::EnableResponse(EnableResponse::new()),
+            MessageType::EventAck => Self::EventAckResponse(EventAckResponse::new()),
+            MessageType::GetBarcodeData => Self::GetBarcodeDataResponse(GetBarcodeDataResponse::new()),
+            MessageType::GetBarcodeInhibit => Self::GetBarcodeInhibitResponse(GetBarcodeInhibitResponse::new()),
+            MessageType::GetBarcodeReaderConfiguration => Self::GetBarcodeReaderConfigurationResponse(GetBarcodeReaderConfigurationResponse::new()),
+            MessageType::SetBarcodeInhibit => Self::SetBarcodeInhibitResponse(SetBarcodeInhibitResponse::new()),
+            MessageType::SetBarcodeReaderConfiguration => Self::SetBarcodeReaderConfigurationResponse(SetBarcodeReaderConfigurationResponse::new()),
+            MessageType::Hold => Self::HoldResponse(HoldResponse::new()),
+            MessageType::HostProtocolVersion => Self::HostProtocolVersionResponse(HostProtocolVersionResponse::new()),
+            MessageType::LastRejectCode => Self::LastRejectCodeResponse(LastRejectCodeResponse::new()),
+            MessageType::Poll => Self::PollResponse(PollResponse::new()),
+            MessageType::PollWithAck => Self::PollWithAckResponse(PollWithAckResponse::new()),
+            MessageType::Reject => Self::RejectResponse(RejectResponse::new()),
+            MessageType::SerialNumber => Self::SerialNumberResponse(SerialNumberResponse::new()),
+            MessageType::SetEncryptionKey => Self::SetEncryptionKeyResponse(SetEncryptionKeyResponse::new()),
+            MessageType::SetGenerator => Self::SetGeneratorResponse(SetGeneratorResponse::new()),
+            MessageType::SetModulus => Self::SetModulusResponse(SetModulusResponse::new()),
+            MessageType::RequestKeyExchange => Self::RequestKeyExchangeResponse(RequestKeyExchangeResponse::new()),
+            MessageType::SetupRequest => Self::SetupRequestResponse(SetupRequestResponse::new()),
+            MessageType::SmartEmpty => Self::SmartEmptyResponse(SmartEmptyResponse::new()),
+            MessageType::Synchronisation => Self::SyncResponse(SyncResponse::new()),
+            MessageType::UnitData => Self::UnitDataResponse(UnitDataResponse::new()),
+            MessageType::Encrypted => Self::WrappedEncryptedMessage(WrappedEncryptedMessage::new()),
+            _ => Self::PollResponse(PollResponse::new()),
+        }
+    }
+
     /// Gets a reference to the [MessageVariant] as a generic response.
     pub fn as_response(&self) -> &dyn ResponseOps {
+        match self {
+            Self::SetInhibitsResponse(msg) => msg,
+            Self::ChannelValueDataResponse(msg) => msg,
+            Self::ConfigureBezelResponse(msg) => msg,
+            Self::DisableResponse(msg) => msg,
+            Self::DisplayOffResponse(msg) => msg,
+            Self::DisplayOnResponse(msg) => msg,
+            Self::EmptyResponse(msg) => msg,
+            Self::EnableResponse(msg) => msg,
+            Self::EncryptionResetResponse(msg) => msg,
+            Self::EventAckResponse(msg) => msg,
+            Self::GetBarcodeDataResponse(msg) => msg,
+            Self::GetBarcodeInhibitResponse(msg) => msg,
+            Self::GetBarcodeReaderConfigurationResponse(msg) => msg,
+            Self::SetBarcodeInhibitResponse(msg) => msg,
+            Self::SetBarcodeReaderConfigurationResponse(msg) => msg,
+            Self::HoldResponse(msg) => msg,
+            Self::HostProtocolVersionResponse(msg) => msg,
+            Self::LastRejectCodeResponse(msg) => msg,
+            Self::PollResponse(msg) => msg,
+            Self::PollWithAckResponse(msg) => msg,
+            Self::RejectResponse(msg) => msg,
+            Self::SerialNumberResponse(msg) => msg,
+            Self::SetEncryptionKeyResponse(msg) => msg,
+            Self::SetGeneratorResponse(msg) => msg,
+            Self::SetModulusResponse(msg) => msg,
+            Self::RequestKeyExchangeResponse(msg) => msg,
+            Self::SetupRequestResponse(msg) => msg,
+            Self::SmartEmptyResponse(msg) => msg,
+            Self::SyncResponse(msg) => msg,
+            Self::UnitDataResponse(msg) => msg,
+            Self::WrappedEncryptedMessage(msg) => msg,
+        }
+    }
+
+    /// Gets a mutable reference to the [MessageVariant] as a generic response.
+    pub fn as_response_mut(&mut self) -> &mut dyn ResponseOps {
         match self {
             Self::SetInhibitsResponse(msg) => msg,
             Self::ChannelValueDataResponse(msg) => msg,
