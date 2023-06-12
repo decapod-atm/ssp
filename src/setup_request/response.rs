@@ -154,7 +154,7 @@ impl SetupRequestResponse {
         Ok(
             self.buf[channel_country_code_start..channel_country_code_end]
                 .chunks_exact(len::U24)
-                .map(|c| CountryCode::from(c))
+                .map(CountryCode::from)
                 .collect::<Vec<CountryCode>>()
                 .into(),
         )
@@ -177,7 +177,7 @@ impl SetupRequestResponse {
 
         Ok(self.buf[channel_values_start..channel_values_end]
             .chunks_exact(4)
-            .map(|c| ChannelValue::from(c))
+            .map(ChannelValue::from)
             .collect::<Vec<ChannelValue>>()
             .into())
     }

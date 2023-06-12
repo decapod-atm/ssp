@@ -220,6 +220,7 @@ pub trait MessageOps {
     }
 
     /// Constructs a message from a byte buffer.
+    #[allow(clippy::wrong_self_convention)]
     fn from_buf(&mut self, buf: &[u8]) -> Result<()> {
         let len = self.len();
         let mut buf_len = buf.len();

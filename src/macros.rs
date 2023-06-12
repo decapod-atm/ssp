@@ -757,16 +757,6 @@ macro_rules! make_list {
                 self.0.is_empty()
             }
 
-            /// Get the list as a slice.
-            pub fn as_ref(&self) -> &[$name] {
-                self.0.as_slice()
-            }
-
-            /// Get the list as a mutable slice.
-            pub fn as_mut(&mut self) -> &mut [$name] {
-                self.0.as_mut()
-            }
-
             /// Get the list as a reference to its inner container type.
             pub fn as_inner(&self) -> &$crate::Vec<$name> {
                 &self.0
@@ -780,6 +770,18 @@ macro_rules! make_list {
             /// Converts the list into its inner container type.
             pub fn into_inner(self) -> $crate::Vec<$name> {
                 self.0
+            }
+        }
+
+        impl AsRef<[$name]> for $list_name {
+            fn as_ref(&self) -> &[$name] {
+                self.0.as_slice()
+            }
+        }
+
+        impl AsMut<[$name]> for $list_name {
+            fn as_mut(&mut self) -> &mut [$name] {
+                self.0.as_mut()
             }
         }
 
