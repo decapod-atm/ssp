@@ -74,23 +74,19 @@ impl Generator {
     }
 
     fn is_prime(candidate: u64, rng: &mut ChaCha20Rng) -> bool {
-        if candidate == ZERO {
-            false
-        } else if Self::is_even(candidate) && candidate != TWO {
-            false
-        } else if !Self::div_small_primes(candidate) {
-            false
-        } else if !Self::fermat(candidate, rng) {
-            false
-        } else if !Self::miller_rabin(candidate, rng) {
-            false
-        } else {
-            true
-        }
+        candidate != ZERO
+            && (Self::is_odd(candidate) || candidate == TWO)
+            && Self::div_small_primes(candidate)
+            && Self::fermat(candidate, rng)
+            && Self::miller_rabin(candidate, rng)
     }
 
     fn is_even(n: u64) -> bool {
         n % TWO == 0
+    }
+
+    fn is_odd(n: u64) -> bool {
+        !Self::is_even(n)
     }
 
     fn gen_range(low: u64, high: u64, rng: &mut ChaCha20Rng) -> u64 {
@@ -182,7 +178,7 @@ impl Generator {
         let mut d = n - ONE;
 
         while Self::is_even(d) {
-            d = d / TWO;
+            d /= TWO;
             s += ONE;
         }
 

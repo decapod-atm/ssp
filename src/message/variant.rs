@@ -52,31 +52,59 @@ impl MessageVariant {
     pub fn new(msg_type: MessageType) -> Self {
         match msg_type {
             MessageType::SetInhibits => Self::SetInhibitsResponse(SetInhibitsResponse::new()),
-            MessageType::ChannelValueData => Self::ChannelValueDataResponse(ChannelValueDataResponse::new()),
-            MessageType::ConfigureBezel => Self::ConfigureBezelResponse(ConfigureBezelResponse::new()),
+            MessageType::ChannelValueData => {
+                Self::ChannelValueDataResponse(ChannelValueDataResponse::new())
+            }
+            MessageType::ConfigureBezel => {
+                Self::ConfigureBezelResponse(ConfigureBezelResponse::new())
+            }
             MessageType::Disable => Self::DisableResponse(DisableResponse::new()),
             MessageType::DisplayOff => Self::DisplayOffResponse(DisplayOffResponse::new()),
             MessageType::DisplayOn => Self::DisplayOnResponse(DisplayOnResponse::new()),
             MessageType::Empty => Self::EmptyResponse(EmptyResponse::new()),
-            MessageType::EncryptionReset => Self::EncryptionResetResponse(EncryptionResetResponse::new()),
+            MessageType::EncryptionReset => {
+                Self::EncryptionResetResponse(EncryptionResetResponse::new())
+            }
             MessageType::Enable => Self::EnableResponse(EnableResponse::new()),
             MessageType::EventAck => Self::EventAckResponse(EventAckResponse::new()),
-            MessageType::GetBarcodeData => Self::GetBarcodeDataResponse(GetBarcodeDataResponse::new()),
-            MessageType::GetBarcodeInhibit => Self::GetBarcodeInhibitResponse(GetBarcodeInhibitResponse::new()),
-            MessageType::GetBarcodeReaderConfiguration => Self::GetBarcodeReaderConfigurationResponse(GetBarcodeReaderConfigurationResponse::new()),
-            MessageType::SetBarcodeInhibit => Self::SetBarcodeInhibitResponse(SetBarcodeInhibitResponse::new()),
-            MessageType::SetBarcodeReaderConfiguration => Self::SetBarcodeReaderConfigurationResponse(SetBarcodeReaderConfigurationResponse::new()),
+            MessageType::GetBarcodeData => {
+                Self::GetBarcodeDataResponse(GetBarcodeDataResponse::new())
+            }
+            MessageType::GetBarcodeInhibit => {
+                Self::GetBarcodeInhibitResponse(GetBarcodeInhibitResponse::new())
+            }
+            MessageType::GetBarcodeReaderConfiguration => {
+                Self::GetBarcodeReaderConfigurationResponse(
+                    GetBarcodeReaderConfigurationResponse::new(),
+                )
+            }
+            MessageType::SetBarcodeInhibit => {
+                Self::SetBarcodeInhibitResponse(SetBarcodeInhibitResponse::new())
+            }
+            MessageType::SetBarcodeReaderConfiguration => {
+                Self::SetBarcodeReaderConfigurationResponse(
+                    SetBarcodeReaderConfigurationResponse::new(),
+                )
+            }
             MessageType::Hold => Self::HoldResponse(HoldResponse::new()),
-            MessageType::HostProtocolVersion => Self::HostProtocolVersionResponse(HostProtocolVersionResponse::new()),
-            MessageType::LastRejectCode => Self::LastRejectCodeResponse(LastRejectCodeResponse::new()),
+            MessageType::HostProtocolVersion => {
+                Self::HostProtocolVersionResponse(HostProtocolVersionResponse::new())
+            }
+            MessageType::LastRejectCode => {
+                Self::LastRejectCodeResponse(LastRejectCodeResponse::new())
+            }
             MessageType::Poll => Self::PollResponse(PollResponse::new()),
             MessageType::PollWithAck => Self::PollWithAckResponse(PollWithAckResponse::new()),
             MessageType::Reject => Self::RejectResponse(RejectResponse::new()),
             MessageType::SerialNumber => Self::SerialNumberResponse(SerialNumberResponse::new()),
-            MessageType::SetEncryptionKey => Self::SetEncryptionKeyResponse(SetEncryptionKeyResponse::new()),
+            MessageType::SetEncryptionKey => {
+                Self::SetEncryptionKeyResponse(SetEncryptionKeyResponse::new())
+            }
             MessageType::SetGenerator => Self::SetGeneratorResponse(SetGeneratorResponse::new()),
             MessageType::SetModulus => Self::SetModulusResponse(SetModulusResponse::new()),
-            MessageType::RequestKeyExchange => Self::RequestKeyExchangeResponse(RequestKeyExchangeResponse::new()),
+            MessageType::RequestKeyExchange => {
+                Self::RequestKeyExchangeResponse(RequestKeyExchangeResponse::new())
+            }
             MessageType::SetupRequest => Self::SetupRequestResponse(SetupRequestResponse::new()),
             MessageType::SmartEmpty => Self::SmartEmptyResponse(SmartEmptyResponse::new()),
             MessageType::Synchronisation => Self::SyncResponse(SyncResponse::new()),

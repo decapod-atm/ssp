@@ -54,7 +54,7 @@ impl SetInhibitsCommand {
     pub fn inhibits(&self) -> EnableBitfieldList {
         self.buf[self.inhibit_start()..self.inhibit_end()]
             .iter()
-            .map(|b| EnableBitfield::from(b))
+            .map(EnableBitfield::from)
             .collect::<Vec<EnableBitfield>>()
             .into()
     }
