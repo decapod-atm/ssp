@@ -1,0 +1,28 @@
+[package]
+name = "ssp"
+version = "0.1.0"
+edition = "2021"
+authors = ["SSP Rust Developers"]
+description = "Messages and related types for implementing the SSP/eSSP serial communication protocol"
+keywords = ["no-std", "serial", "ssp", "bill-acceptor", "bill-validator"]
+categories = ["no-std"]
+repository = "https://github.com/ssp-rs/ssp"
+license = "MIT"
+
+[dependencies]
+bitfield = "0.14"
+crc = "3.0"
+heapless = "0.7"
+log = { version = "0.4", default-features = false }
+aes = { version = "0.8.2" }
+num-bigint = { version = "0.4", default-features = false }
+num-traits = { version = "0.2", default-features = false }
+pbkdf2 = "0.12"
+rand = "0.8"
+rand_chacha = "0.3"
+serialport = { version = "4.2", default-features = false, optional = true }
+sha2 = "0.10"
+zeroize = { version = "1.6", features = ["zeroize_derive"] }
+
+[features]
+std = ["log/std", "rand/std", "rand/std_rng", "serialport"]

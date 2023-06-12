@@ -1,0 +1,3 @@
+[submodule "ssp-server"]
+	path = ssp-server
+	url = https://github.com/ssp-rs/ssp-server.git
