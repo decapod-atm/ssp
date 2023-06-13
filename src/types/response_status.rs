@@ -63,7 +63,7 @@ pub enum ResponseStatus {
     /// Add note credit from escrow to storage.
     ///
     /// This event is generated when the banknote has been moved from the escrow position to a
-    /// safe postion within the validator system where the baknote cannot be retreived by the user.
+    /// safe position within the validator system where the banknote cannot be retreived by the user.
     ///
     /// At this point, it is safe for the host to use this event as it's 'Credt' point.
     NoteCredit = 0xee,
@@ -179,7 +179,7 @@ impl From<ResponseStatus> for u8 {
             ResponseStatus::NoteCredit => 0xee,
             ResponseStatus::Read => 0xef,
             ResponseStatus::Ok => 0xf0,
-            ResponseStatus::DeviceReset => 0xf1, 
+            ResponseStatus::DeviceReset => 0xf1,
             ResponseStatus::CommandNotKnown => 0xf2,
             ResponseStatus::WrongNumberParameters => 0xf3,
             ResponseStatus::ParameterOutOfRange => 0xf4,

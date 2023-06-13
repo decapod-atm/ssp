@@ -17,12 +17,16 @@ log = { version = "0.4", default-features = false }
 aes = { version = "0.8.2" }
 num-bigint = { version = "0.4", default-features = false }
 num-traits = { version = "0.2", default-features = false }
+parking_lot = "0.12"
 pbkdf2 = "0.12"
 rand = "0.8"
 rand_chacha = "0.3"
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 serialport = { version = "4.2", default-features = false, optional = true }
 sha2 = "0.10"
 zeroize = { version = "1.6", features = ["zeroize_derive"] }
 
 [features]
-std = ["log/std", "rand/std", "rand/std_rng", "serialport"]
+default = ["nv200"]
+std = ["log/std", "rand/std", "rand/std_rng", "serde/std", "serialport"]
+nv200 = []

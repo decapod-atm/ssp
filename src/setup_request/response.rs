@@ -16,7 +16,7 @@ pub mod index {
     pub const CHANNEL_VALUES: usize = 16;
 }
 
-/// SetupRequest - Response (0x06)
+/// SetupRequest - Response (0x05)
 ///
 /// Represents a response to an [SetupRequestCommand](crate::SetupRequestCommand) message.
 #[repr(C)]

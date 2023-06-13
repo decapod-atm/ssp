@@ -206,6 +206,7 @@ macro_rules! anti_bool_enum {
     };
 }
 
+/// Creates a tuple struct with a given name, base type, and documentation.
 #[macro_export]
 macro_rules! tuple_struct {
     ($name:ident, $base:ident, $doc:tt) => {
@@ -257,6 +258,59 @@ macro_rules! tuple_struct {
     };
 }
 
+/// Creates a serializable tuple struct with a given name, base type, and documentation.
+#[macro_export]
+macro_rules! tuple_struct_ser {
+    ($name:ident, $base:ident, $doc:tt) => {
+        #[doc = $doc]
+        #[repr(C)]
+        #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+        pub struct $name(pub $base);
+
+        impl $name {
+            /// Creates a new tuple struct type.
+            pub fn new() -> Self {
+                Self($base::default())
+            }
+
+            /// Converts an inner type into a new tuple struct.
+            pub const fn from_inner(b: $base) -> Self {
+                Self(b)
+            }
+
+            /// Converts a tuple struct into its inner type.
+            pub const fn as_inner(&self) -> $base {
+                self.0
+            }
+        }
+
+        impl From<$base> for $name {
+            fn from(val: $base) -> Self {
+                Self::from_inner(val)
+            }
+        }
+
+        impl From<$name> for $base {
+            fn from(val: $name) -> Self {
+                val.as_inner()
+            }
+        }
+
+        impl From<&$name> for $base {
+            fn from(val: &$name) -> Self {
+                val.as_inner()
+            }
+        }
+
+        impl Default for $name {
+            fn default() -> Self {
+                Self::new()
+            }
+        }
+    };
+}
+
+/// Creates a named type to represent a key struct used in encryption.
 #[macro_export]
 macro_rules! make_key {
     ($name:ident, $base:ident, $doc:tt) => {

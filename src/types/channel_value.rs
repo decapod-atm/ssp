@@ -1,6 +1,6 @@
-use crate::{make_list, std::fmt, tuple_struct};
+use crate::{make_list, std::fmt, tuple_struct_ser};
 
-tuple_struct!(ChannelValue, u32, "Channel denomination value.");
+tuple_struct_ser!(ChannelValue, u32, "Channel denomination value.");
 
 impl From<&[u8]> for ChannelValue {
     fn from(val: &[u8]) -> Self {
