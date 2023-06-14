@@ -202,14 +202,27 @@ impl SetupRequestResponse {
 
         let channel_values_start = self.channel_values_long_start();
         let channel_values_end = self.channel_values_long_end();
+        let protocol_start = self.protocol_version_start();
+        let protocol_end = self.protocol_version_end();
 
         let buf_end = len::HEADER + self.data_len();
         let buf_range = msg_index::DATA..=buf_end;
 
-        if buf_range.contains(&channel_values_start) && buf_range.contains(&channel_values_end) {
+        let protocol = self
+            .buf
+            .get(protocol_start)
+            .ok_or(Error::InvalidDataLength((protocol_start, buf_end)))?;
+
+        let (start, end) = if *protocol < 6 {
+            (protocol_start, protocol_end)
+        } else {
+            (channel_values_start, channel_values_end)
+        };
+
+        if buf_range.contains(&start) && buf_range.contains(&end) {
             Ok(())
         } else {
-            Err(Error::InvalidDataLength((channel_values_end, buf_end)))
+            Err(Error::InvalidDataLength((end, buf_end)))
         }
     }
 }
@@ -236,13 +249,19 @@ impl fmt::Display for SetupRequestResponse {
                 let channel_sec = self.channel_security_levels().unwrap();
                 let real_value_multi = self.real_value_multiplier().unwrap();
                 let protocol_version = self.protocol_version().unwrap();
-                let channel_country_codes = self.channel_country_codes().unwrap();
-                let channel_values_long = self.channel_values_long().unwrap();
                 let crc = self.checksum();
 
                 write!(
                     f,
-                    "STX: 0x{stx:02x} | SEQID: {seqid} | LEN: 0x{data_len:02x} | Response status: {status} | Unit type: {unit} | Firmware version: {firmware_version} | Country code: {country_code} | Value multiplier: {value_multi} | Number of channels: {num_channels} | Channel values: {channel_values} | Channel security levels: {channel_sec:02x?} | Real value multiplier: {real_value_multi} | Protocol version: {protocol_version} | Channel country codes: {channel_country_codes} | Channel values (long): {channel_values_long} | CRC-16: 0x{crc:04x}")
+                    "STX: 0x{stx:02x} | SEQID: {seqid} | LEN: 0x{data_len:02x} | Response status: {status} | Unit type: {unit} | Firmware version: {firmware_version} | Country code: {country_code} | Value multiplier: {value_multi} | Number of channels: {num_channels} | Channel values: {channel_values} | Channel security levels: {channel_sec:02x?} | Real value multiplier: {real_value_multi} | Protocol version: {protocol_version}")?;
+
+                if (protocol_version as u8) < 6 {
+                    write!(f, "| CRC-16: 0x{crc:04x}")
+                } else {
+                    let channel_country_codes = self.channel_country_codes().unwrap();
+                    let channel_values_long = self.channel_values_long().unwrap();
+                    write!(f, "| Channel country codes: {channel_country_codes} | Channel values (long): {channel_values_long} | CRC-16: 0x{crc:04x}")
+                }
             }
             Err(err) => {
                 write!(f, "Invalid SetupRequestResponse message: {err}")

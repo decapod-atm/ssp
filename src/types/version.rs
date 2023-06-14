@@ -56,6 +56,11 @@ use crate::tuple_struct;
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ProtocolVersion {
+    One = 0x01,
+    Two = 0x02,
+    Three = 0x03,
+    Four = 0x04,
+    Five = 0x05,
     Six = 0x06,
     Seven = 0x07,
     Eight = 0x08,
@@ -65,6 +70,11 @@ pub enum ProtocolVersion {
 impl From<u8> for ProtocolVersion {
     fn from(b: u8) -> Self {
         match b {
+            0x01 => Self::One,
+            0x02 => Self::Two,
+            0x03 => Self::Three,
+            0x04 => Self::Four,
+            0x05 => Self::Five,
             0x06 => Self::Six,
             0x07 => Self::Seven,
             0x08 => Self::Eight,
@@ -76,6 +86,11 @@ impl From<u8> for ProtocolVersion {
 impl From<ProtocolVersion> for u8 {
     fn from(p: ProtocolVersion) -> Self {
         match p {
+            ProtocolVersion::One => 0x01,
+            ProtocolVersion::Two => 0x02,
+            ProtocolVersion::Three => 0x03,
+            ProtocolVersion::Four => 0x04,
+            ProtocolVersion::Five => 0x05,
             ProtocolVersion::Six => 0x06,
             ProtocolVersion::Seven => 0x07,
             ProtocolVersion::Eight => 0x08,
@@ -93,6 +108,11 @@ impl From<&ProtocolVersion> for u8 {
 impl From<ProtocolVersion> for &'static str {
     fn from(p: ProtocolVersion) -> Self {
         match p {
+            ProtocolVersion::One => "1",
+            ProtocolVersion::Two => "2",
+            ProtocolVersion::Three => "3",
+            ProtocolVersion::Four => "4",
+            ProtocolVersion::Five => "5",
             ProtocolVersion::Six => "6",
             ProtocolVersion::Seven => "7",
             ProtocolVersion::Eight => "8",
