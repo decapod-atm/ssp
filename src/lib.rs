@@ -13,7 +13,6 @@
 //!
 //! The current implementation supports both the standard (SSP), and encrypted variant (eSSP).
 
-#[cfg(not(feature = "std"))]
 extern crate alloc;
 
 #[macro_use(bitfield)]
@@ -27,6 +26,7 @@ use std;
 mod macros;
 
 pub mod channel_value_data;
+mod channels;
 pub mod configure_bezel;
 pub mod crc;
 pub mod disable;
@@ -68,6 +68,7 @@ pub mod types;
 pub mod unit_data;
 
 pub use channel_value_data::*;
+pub use channels::*;
 pub use configure_bezel::*;
 pub use disable::*;
 pub use display_off::*;

@@ -18,14 +18,18 @@ pub enum Error {
     InvalidDataLength((usize, usize)),
     InvalidInhibitChannels,
     InvalidLength((usize, usize)),
+    InvalidEvent((ResponseStatus, ResponseStatus)),
     InvalidMessage(MessageType),
     InvalidMessageRaw((MessageType, u8)),
     InvalidSTX(u8),
+    PollingReinit,
+    QueueTimeout,
     #[cfg(feature = "std")]
     Io(std::io::ErrorKind),
     #[cfg(feature = "std")]
     SerialPort(serialport::ErrorKind),
     Status(ResponseStatus),
+    Timeout(&'static str),
 }
 
 impl fmt::Display for Error {
@@ -48,6 +52,9 @@ impl fmt::Display for Error {
             Error::InvalidDataLength((have, exp)) => {
                 write!(f, "Invalid data length, have: {have}, expected: {exp}")
             }
+            Error::InvalidEvent((have, exp)) => {
+                write!(f, "Invalid device event, have: {have}, expected: {exp}")
+            }
             Error::InvalidInhibitChannels => {
                 write!(f, "Trying to set an invalid number of inhibit channels")
             }
@@ -61,11 +68,18 @@ impl fmt::Display for Error {
             Error::InvalidSTX(err) => {
                 write!(f, "Invalid message STX, have: {err}, expected: {STX}")
             }
+            Error::PollingReinit => {
+                write!(f, "Background polling already initialized")
+            }
+            Error::QueueTimeout => {
+                write!(f, "Failed to retrieve a queued event before timeout")
+            }
             #[cfg(feature = "std")]
             Error::Io(err) => write!(f, "I/O error: {err}"),
             #[cfg(feature = "std")]
             Error::SerialPort(err) => write!(f, "Serial port communication error: {err:?}"),
             Error::Status(err) => write!(f, "Response status: {err}"),
+            Error::Timeout(err) => write!(f, "Failed to perform action before timeout: {err}"),
         }
     }
 }
@@ -81,5 +95,11 @@ impl From<serialport::Error> for Error {
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
         Self::Io(err.kind())
+    }
+}
+
+impl From<()> for Error {
+    fn from(_err: ()) -> Self {
+        Self::Generic(-1)
     }
 }
