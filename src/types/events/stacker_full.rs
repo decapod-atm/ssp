@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [StackerFull](crate::ResponseStatus::StackerFull) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl StackerFullEvent {
     /// Creates a new [StackerFullEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [StackerFullEvent].
+    pub const fn method() -> Method {
+        Method::StackerFull
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -49,14 +54,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for StackerFullEvent {
     }
 }
 
-impl From<&StackerFullEvent> for Event {
-    fn from(_val: &StackerFullEvent) -> Self {
-        Self::new("reject", &[]).unwrap()
+impl fmt::Display for StackerFullEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<StackerFullEvent> for Event {
-    fn from(val: StackerFullEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(StackerFullEvent);

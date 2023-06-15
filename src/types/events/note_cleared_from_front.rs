@@ -1,6 +1,6 @@
-use crate::{channel_value, ChannelValue, Error, ResponseStatus, Result};
+use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [NoteClearedFromFront](crate::ResponseStatus::NoteClearedFromFront) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -12,6 +12,16 @@ impl NoteClearedFromFrontEvent {
     /// Creates a new [NoteClearedFromFrontEvent] from the [ChannelValue].
     pub const fn new(value: ChannelValue) -> Self {
         Self { value }
+    }
+
+    /// Gets the [Method] for the [NoteClearedFromFrontEvent].
+    pub const fn method() -> Method {
+        Method::NoteClearedFromFront
+    }
+
+    /// Converts the [NoteClearedFromFrontEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the [ChannelValue].
@@ -65,23 +75,6 @@ impl<const N: usize> TryFrom<&[u8; N]> for NoteClearedFromFrontEvent {
     }
 }
 
-impl From<&NoteClearedFromFrontEvent> for Event {
-    fn from(val: &NoteClearedFromFrontEvent) -> Self {
-        // `unwrap` is guaranteed not panic because the data length is in a valid range.
-        Self::new(
-            "note_cleared_return",
-            val.value().as_inner().to_le_bytes().as_ref(),
-        )
-        .unwrap()
-    }
-}
-
-impl From<NoteClearedFromFrontEvent> for Event {
-    fn from(val: NoteClearedFromFrontEvent) -> Self {
-        (&val).into()
-    }
-}
-
 impl From<ChannelValue> for NoteClearedFromFrontEvent {
     fn from(val: ChannelValue) -> Self {
         Self::new(val)
@@ -91,5 +84,22 @@ impl From<ChannelValue> for NoteClearedFromFrontEvent {
 impl From<&ChannelValue> for NoteClearedFromFrontEvent {
     fn from(val: &ChannelValue) -> Self {
         (*val).into()
+    }
+}
+
+impl fmt::Display for NoteClearedFromFrontEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
+
+        let method = self.to_str();
+        let value = self.value();
+
+        write!(f, "{o}\"{method}\": {o}\"value\": {value}{c}{c}")
+    }
+}
+
+impl Default for NoteClearedFromFrontEvent {
+    fn default() -> Self {
+        Self::new(ChannelValue::default())
     }
 }

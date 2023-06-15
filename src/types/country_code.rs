@@ -1,8 +1,8 @@
 use crate::std::{self, fmt};
 
-use crate::{make_list, tuple_struct};
+use crate::{make_list, tuple_struct_ser};
 
-tuple_struct!(
+tuple_struct_ser!(
     CountryCode,
     u32,
     "ASCII-encoded country code for the device."
