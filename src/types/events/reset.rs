@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Reset](crate::ResponseStatus::Reset) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl ResetEvent {
     /// Creates a new [ResetEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [ResetEvent].
+    pub const fn method() -> Method {
+        Method::Reset
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -49,14 +54,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for ResetEvent {
     }
 }
 
-impl From<&ResetEvent> for Event {
-    fn from(_val: &ResetEvent) -> Self {
-        Self::new("reset", &[]).unwrap()
+impl fmt::Display for ResetEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<ResetEvent> for Event {
-    fn from(val: ResetEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(ResetEvent);

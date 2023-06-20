@@ -1,9 +1,8 @@
 //! Version information types.
 
-use crate::std;
-use std::fmt;
+use crate::std::{self, fmt};
 
-use crate::tuple_struct;
+use crate::tuple_struct_ser;
 
 /// Protocol version supported by device firmware
 ///
@@ -54,7 +53,7 @@ use crate::tuple_struct;
 /// | 7                | 6.09             |
 /// | 8                | -                |
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ProtocolVersion {
     One = 0x01,
     Two = 0x02,
@@ -127,13 +126,19 @@ impl From<&ProtocolVersion> for &'static str {
     }
 }
 
+impl Default for ProtocolVersion {
+    fn default() -> Self {
+        Self::Six
+    }
+}
+
 impl fmt::Display for ProtocolVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", <&'static str>::from(self))
     }
 }
 
-tuple_struct!(
+tuple_struct_ser!(
     FirmwareVersion,
     u32,
     "ASCII-encoded firmware version for the device."

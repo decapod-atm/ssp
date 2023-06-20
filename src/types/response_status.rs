@@ -2,7 +2,7 @@ use crate::{impl_default, make_list, std::fmt};
 
 /// Represents the device's response status byte.
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ResponseStatus {
     // Events
     /// Note cleared from front bezel.
@@ -129,10 +129,9 @@ impl ResponseStatus {
     pub fn is_ok(&self) -> bool {
         *self == Self::Ok
     }
-}
 
-impl From<u8> for ResponseStatus {
-    fn from(val: u8) -> Self {
+    /// Converts a `u8` into a [ResponseStatus].
+    pub const fn from_u8(val: u8) -> Self {
         match val {
             0xe1 => Self::NoteClearedFromFront,
             0xe2 => Self::NoteClearedIntoCashbox,
@@ -158,6 +157,41 @@ impl From<u8> for ResponseStatus {
             0xfa => Self::KeyNotSet,
             res => Self::Reserved(res),
         }
+    }
+
+    /// Converts the [ResponseStatus] to a `u8`.
+    pub const fn to_u8(&self) -> u8 {
+        match self {
+            Self::NoteClearedFromFront => 0xe1,
+            Self::NoteClearedIntoCashbox => 0xe2,
+            Self::CashboxRemoved => 0xe3,
+            Self::CashboxReplaced => 0xe4,
+            Self::FraudAttempt => 0xe6,
+            Self::StackerFull => 0xe7,
+            Self::Disabled => 0xe8,
+            Self::UnsafeJam => 0xe9,
+            Self::Stacked => 0xeb,
+            Self::Stacking => 0xcc,
+            Self::Rejected => 0xec,
+            Self::Rejecting => 0xed,
+            Self::NoteCredit => 0xee,
+            Self::Read => 0xef,
+            Self::Ok => 0xf0,
+            Self::DeviceReset => 0xf1,
+            Self::CommandNotKnown => 0xf2,
+            Self::WrongNumberParameters => 0xf3,
+            Self::ParameterOutOfRange => 0xf4,
+            Self::CommandCannotBeProcessed => 0xf5,
+            Self::Fail => 0xf8,
+            Self::KeyNotSet => 0xfa,
+            Self::Reserved(res) => *res,
+        }
+    }
+}
+
+impl From<u8> for ResponseStatus {
+    fn from(val: u8) -> Self {
+        Self::from_u8(val)
     }
 }
 

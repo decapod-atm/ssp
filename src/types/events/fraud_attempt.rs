@@ -1,6 +1,6 @@
-use crate::{channel_value, ChannelValue, Error, ResponseStatus, Result};
+use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [FraudAttempt](crate::ResponseStatus::FraudAttempt) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -12,6 +12,11 @@ impl FraudAttemptEvent {
     /// Creates a new [FraudAttemptEvent] from the [ChannelValue].
     pub const fn new(value: ChannelValue) -> Self {
         Self { value }
+    }
+
+    /// Gets the [Method] for the [FraudAttemptEvent].
+    pub const fn method() -> Method {
+        Method::FraudAttempt
     }
 
     /// Gets the [ChannelValue].
@@ -60,19 +65,6 @@ impl<const N: usize> TryFrom<&[u8; N]> for FraudAttemptEvent {
     }
 }
 
-impl From<&FraudAttemptEvent> for Event {
-    fn from(val: &FraudAttemptEvent) -> Self {
-        // `unwrap` is guaranteed not panic because the data length is in a valid range.
-        Self::new("stack", val.value().as_inner().to_le_bytes().as_ref()).unwrap()
-    }
-}
-
-impl From<FraudAttemptEvent> for Event {
-    fn from(val: FraudAttemptEvent) -> Self {
-        (&val).into()
-    }
-}
-
 impl From<ChannelValue> for FraudAttemptEvent {
     fn from(val: ChannelValue) -> Self {
         Self::new(val)
@@ -82,5 +74,21 @@ impl From<ChannelValue> for FraudAttemptEvent {
 impl From<&ChannelValue> for FraudAttemptEvent {
     fn from(val: &ChannelValue) -> Self {
         (*val).into()
+    }
+}
+
+impl fmt::Display for FraudAttemptEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
+    }
+}
+
+impl Default for FraudAttemptEvent {
+    fn default() -> Self {
+        Self::new(ChannelValue::default())
     }
 }

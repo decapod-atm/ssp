@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [UnsafeJam](crate::ResponseStatus::UnsafeJam) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl UnsafeJamEvent {
     /// Creates a new [UnsafeJamEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [UnsafeJamEvent].
+    pub const fn method() -> Method {
+        Method::UnsafeJam
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -49,14 +54,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for UnsafeJamEvent {
     }
 }
 
-impl From<&UnsafeJamEvent> for Event {
-    fn from(_val: &UnsafeJamEvent) -> Self {
-        Self::new("jam", &[]).unwrap()
+impl fmt::Display for UnsafeJamEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<UnsafeJamEvent> for Event {
-    fn from(val: UnsafeJamEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(UnsafeJamEvent);

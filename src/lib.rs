@@ -43,6 +43,8 @@ pub mod get_barcode_inhibit;
 pub mod get_barcode_reader_configuration;
 pub mod hold;
 pub mod host_protocol_version;
+#[cfg(feature = "jsonrpc")]
+pub mod jsonrpc;
 pub mod keys;
 pub mod last_reject_code;
 pub mod len;

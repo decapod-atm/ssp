@@ -1,9 +1,8 @@
-use crate::std;
-use std::fmt;
+use crate::std::fmt;
 
-use crate::tuple_struct;
+use crate::tuple_struct_ser;
 
-tuple_struct!(ValueMultiplier, u32, "Multiplier for device note values.");
+tuple_struct_ser!(ValueMultiplier, u32, "Multiplier for device note values.");
 
 impl From<&[u8]> for ValueMultiplier {
     fn from(val: &[u8]) -> Self {
