@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Disabled](crate::ResponseStatus::Disabled) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl DisabledEvent {
     /// Creates a new [DisabledEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [DisabledEvent].
+    pub const fn method() -> Method {
+        Method::Disabled
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -49,14 +54,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for DisabledEvent {
     }
 }
 
-impl From<&DisabledEvent> for Event {
-    fn from(_val: &DisabledEvent) -> Self {
-        Self::new("disabled", &[]).unwrap()
+impl fmt::Display for DisabledEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<DisabledEvent> for Event {
-    fn from(val: DisabledEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(DisabledEvent);

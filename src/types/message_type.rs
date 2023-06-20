@@ -10,7 +10,7 @@ use crate::{impl_default, std::fmt};
 /// [SequenceFlag](crate::SequenceFlag) value as the previous message, the device will return the
 /// response to the previous message. This happens regardless of the combination of message types.
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum MessageType {
     /// Resets the device.
     Reset = 0x01,

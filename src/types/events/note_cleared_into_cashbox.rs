@@ -1,6 +1,6 @@
-use crate::{channel_value, ChannelValue, Error, ResponseStatus, Result};
+use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [NoteClearedIntoCashbox](crate::ResponseStatus::NoteClearedIntoCashbox) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -12,6 +12,16 @@ impl NoteClearedIntoCashboxEvent {
     /// Creates a new [NoteClearedIntoCashboxEvent] from the [ChannelValue].
     pub const fn new(value: ChannelValue) -> Self {
         Self { value }
+    }
+
+    /// Gets the [Method] for the [NoteClearedIntoCashboxEvent].
+    pub const fn method() -> Method {
+        Method::NoteClearedIntoCashbox
+    }
+
+    /// Converts the [NoteClearedIntoCashboxEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the [ChannelValue].
@@ -65,23 +75,6 @@ impl<const N: usize> TryFrom<&[u8; N]> for NoteClearedIntoCashboxEvent {
     }
 }
 
-impl From<&NoteClearedIntoCashboxEvent> for Event {
-    fn from(val: &NoteClearedIntoCashboxEvent) -> Self {
-        // `unwrap` is guaranteed not panic because the data length is in a valid range.
-        Self::new(
-            "note_cleared_stack",
-            val.value().as_inner().to_le_bytes().as_ref(),
-        )
-        .unwrap()
-    }
-}
-
-impl From<NoteClearedIntoCashboxEvent> for Event {
-    fn from(val: NoteClearedIntoCashboxEvent) -> Self {
-        (&val).into()
-    }
-}
-
 impl From<ChannelValue> for NoteClearedIntoCashboxEvent {
     fn from(val: ChannelValue) -> Self {
         Self::new(val)
@@ -91,5 +84,22 @@ impl From<ChannelValue> for NoteClearedIntoCashboxEvent {
 impl From<&ChannelValue> for NoteClearedIntoCashboxEvent {
     fn from(val: &ChannelValue) -> Self {
         (*val).into()
+    }
+}
+
+impl fmt::Display for NoteClearedIntoCashboxEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
+
+        let method = self.to_str();
+        let value = self.value();
+
+        write!(f, "{o}\"{method}\": {o}\"value\": {value}{c}{c}")
+    }
+}
+
+impl Default for NoteClearedIntoCashboxEvent {
+    fn default() -> Self {
+        Self::new(ChannelValue::default())
     }
 }

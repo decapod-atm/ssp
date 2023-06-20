@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Rejected](crate::ResponseStatus::Rejected) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl RejectedEvent {
     /// Creates a new [RejectedEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [RejectedEvent].
+    pub const fn method() -> Method {
+        Method::Rejected
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -49,14 +54,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for RejectedEvent {
     }
 }
 
-impl From<&RejectedEvent> for Event {
-    fn from(_val: &RejectedEvent) -> Self {
-        Self::new("reject", &[]).unwrap()
+impl fmt::Display for RejectedEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<RejectedEvent> for Event {
-    fn from(val: RejectedEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(RejectedEvent);

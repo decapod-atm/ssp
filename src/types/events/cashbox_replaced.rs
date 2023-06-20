@@ -1,6 +1,6 @@
-use crate::{Error, ResponseStatus, Result};
+use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [CashboxReplaced](crate::ResponseStatus::CashboxReplaced) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -10,6 +10,11 @@ impl CashboxReplacedEvent {
     /// Creates a new [CashboxReplacedEvent].
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Gets the [Method] for the [CashboxReplacedEvent].
+    pub const fn method() -> Method {
+        Method::CashboxReplaced
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -52,14 +57,14 @@ impl<const N: usize> TryFrom<&[u8; N]> for CashboxReplacedEvent {
     }
 }
 
-impl From<&CashboxReplacedEvent> for Event {
-    fn from(_val: &CashboxReplacedEvent) -> Self {
-        Self::new("cashbox_replaced", &[]).unwrap()
+impl fmt::Display for CashboxReplacedEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
+            Self::method().to_str()
+        )
     }
 }
 
-impl From<CashboxReplacedEvent> for Event {
-    fn from(val: CashboxReplacedEvent) -> Self {
-        (&val).into()
-    }
-}
+impl_default!(CashboxReplacedEvent);

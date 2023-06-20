@@ -1,6 +1,6 @@
-use crate::{channel_value, ChannelValue, Error, ResponseStatus, Result};
+use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::Event;
+use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Read](crate::ResponseStatus::Read) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -14,9 +14,19 @@ impl ReadEvent {
         Self { value }
     }
 
+    /// Gets the [Method] for the [ReadEvent].
+    pub const fn method() -> Method {
+        Method::Read
+    }
+
+    /// Converts the [ReadEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
+    }
+
     /// Gets the [ChannelValue].
-    pub fn value(&self) -> &ChannelValue {
-        &self.value
+    pub const fn value(&self) -> ChannelValue {
+        self.value
     }
 
     /// Sets the [ChannelValue].
@@ -64,23 +74,6 @@ impl<const N: usize> TryFrom<&[u8; N]> for ReadEvent {
     }
 }
 
-impl From<&ReadEvent> for Event {
-    fn from(val: &ReadEvent) -> Self {
-        // `unwrap` is guaranteed not panic because the data length is in a valid range.
-        Self::new(
-            "cash_insertion_event",
-            val.value().as_inner().to_le_bytes().as_ref(),
-        )
-        .unwrap()
-    }
-}
-
-impl From<ReadEvent> for Event {
-    fn from(val: ReadEvent) -> Self {
-        (&val).into()
-    }
-}
-
 impl From<ChannelValue> for ReadEvent {
     fn from(val: ChannelValue) -> Self {
         Self::new(val)
@@ -90,5 +83,22 @@ impl From<ChannelValue> for ReadEvent {
 impl From<&ChannelValue> for ReadEvent {
     fn from(val: &ChannelValue) -> Self {
         (*val).into()
+    }
+}
+
+impl fmt::Display for ReadEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
+
+        let method = self.to_str();
+        let value = self.value();
+
+        write!(f, "{o}\"{method}\": {o}\"value\": {value}{c}{c}",)
+    }
+}
+
+impl Default for ReadEvent {
+    fn default() -> Self {
+        Self::new(ChannelValue::default())
     }
 }

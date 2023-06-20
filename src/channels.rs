@@ -67,7 +67,7 @@ pub fn lock_channels() -> Result<MutexGuard<'static, Channels>> {
         }
     }
 
-    Err(Error::Timeout("channels lock"))
+    Err(Error::Timeout("channels lock".into()))
 }
 
 /// Acquires a lock on the global [Channels].
@@ -84,7 +84,7 @@ pub fn lock_channels() -> Result<MutexGuard<'static, Channels>> {
         attempts += 1;
     }
 
-    Err(Error::Timeout("channels lock"))
+    Err(Error::Timeout("channels lock".into()))
 }
 
 /// Gets a reference to the number of configured channels.
