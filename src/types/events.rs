@@ -238,10 +238,10 @@ impl From<Method> for Event {
     fn from(method: Method) -> Self {
         let payload = match method {
             Method::Fail => EventPayload::Error(Error::Generic(-1)),
-            Method::Disable | Method::Shutdown => {
+            Method::Disable | Method::Stop | Method::Shutdown => {
                 EventPayload::DisableEvent(DisableEvent::default())
             }
-            Method::Enable => EventPayload::EnableEvent(EnableEvent::default()),
+            Method::Enable | Method::Accept => EventPayload::EnableEvent(EnableEvent::default()),
             Method::Reject => EventPayload::RejectEvent(RejectEvent::default()),
             Method::Stack => EventPayload::StackEvent(StackEvent::default()),
             Method::Status => EventPayload::StatusEvent(StatusEvent::default()),
