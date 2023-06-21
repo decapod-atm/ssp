@@ -339,6 +339,7 @@ impl_default!(Method);
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "jsonrpc")]
     use super::*;
 
     #[cfg(feature = "jsonrpc")]
