@@ -2,7 +2,7 @@
 
 use crate::std::{self, fmt};
 
-use crate::tuple_struct_ser;
+use crate::{impl_default, tuple_struct_ser};
 
 /// Protocol version supported by device firmware
 ///
@@ -66,9 +66,17 @@ pub enum ProtocolVersion {
     Reserved = 0xff,
 }
 
-impl From<u8> for ProtocolVersion {
-    fn from(b: u8) -> Self {
-        match b {
+impl ProtocolVersion {
+    /// Creates a new [ProtocolVersion].
+    ///
+    /// Default value is `0x06`, since this seems to be the base protocol for most devices.
+    pub const fn new() -> Self {
+        Self::Six
+    }
+
+    /// Converts a `u8` into a [ProtocolVersion].
+    pub const fn from_u8(val: u8) -> Self {
+        match val {
             0x01 => Self::One,
             0x02 => Self::Two,
             0x03 => Self::Three,
@@ -80,11 +88,10 @@ impl From<u8> for ProtocolVersion {
             _ => Self::Reserved,
         }
     }
-}
 
-impl From<ProtocolVersion> for u8 {
-    fn from(p: ProtocolVersion) -> Self {
-        match p {
+    /// Converts a [ProtocolVersion] into a `u8`.
+    pub const fn to_u8(&self) -> u8 {
+        match self {
             ProtocolVersion::One => 0x01,
             ProtocolVersion::Two => 0x02,
             ProtocolVersion::Three => 0x03,
@@ -98,15 +105,27 @@ impl From<ProtocolVersion> for u8 {
     }
 }
 
+impl From<u8> for ProtocolVersion {
+    fn from(val: u8) -> Self {
+        Self::from_u8(val)
+    }
+}
+
+impl From<ProtocolVersion> for u8 {
+    fn from(val: ProtocolVersion) -> Self {
+        val.to_u8()
+    }
+}
+
 impl From<&ProtocolVersion> for u8 {
-    fn from(p: &ProtocolVersion) -> Self {
-        (*p).into()
+    fn from(val: &ProtocolVersion) -> Self {
+        (*val).into()
     }
 }
 
 impl From<ProtocolVersion> for &'static str {
-    fn from(p: ProtocolVersion) -> Self {
-        match p {
+    fn from(val: ProtocolVersion) -> Self {
+        match val {
             ProtocolVersion::One => "1",
             ProtocolVersion::Two => "2",
             ProtocolVersion::Three => "3",
@@ -121,14 +140,8 @@ impl From<ProtocolVersion> for &'static str {
 }
 
 impl From<&ProtocolVersion> for &'static str {
-    fn from(p: &ProtocolVersion) -> Self {
-        (*p).into()
-    }
-}
-
-impl Default for ProtocolVersion {
-    fn default() -> Self {
-        Self::Six
+    fn from(val: &ProtocolVersion) -> Self {
+        (*val).into()
     }
 }
 
@@ -137,6 +150,8 @@ impl fmt::Display for ProtocolVersion {
         write!(f, "{}", <&'static str>::from(self))
     }
 }
+
+impl_default!(ProtocolVersion);
 
 tuple_struct_ser!(
     FirmwareVersion,
