@@ -1,4 +1,4 @@
-use crate::std::{fmt, str::FromStr};
+use crate::std::{self, fmt, str::FromStr};
 use crate::{impl_default, Error, ResponseStatus, Result};
 
 /// Methods for [Event]s.
@@ -7,12 +7,16 @@ use crate::{impl_default, Error, ResponseStatus, Result};
 ///
 /// When adding a new [Event], please add an additional entry here.
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Method {
     /// Disable the device, stop accepting notes and commands.
     Disable,
+    /// Alias for Disable.
+    Stop,
     /// Enable the device to begin accepting notes and commands.
     Enable,
+    /// Alias for Enable.
+    Accept,
     /// Reject a note in escrow.
     Reject,
     /// Stack a note in escrow.
@@ -68,7 +72,9 @@ impl Method {
         match self {
             Self::Status => "status",
             Self::Enable => "enable",
+            Self::Accept => "accept",
             Self::Disable => "disable",
+            Self::Stop => "stop",
             Self::Reject => "reject",
             Self::Stack => "stack",
             Self::Shutdown => "shutdown",
@@ -159,7 +165,9 @@ impl FromStr for Method {
         let res = match val {
             "status" => Self::Status,
             "enable" => Self::Enable,
+            "accept" => Self::Accept,
             "disable" => Self::Disable,
+            "stop" => Self::Stop,
             "reject" => Self::Reject,
             "stack" => Self::Stack,
             "shutdown" => Self::Shutdown,
@@ -167,14 +175,15 @@ impl FromStr for Method {
             "cashbox_replaced" => Self::CashboxReplaced,
             "disabled" => Self::Disabled,
             "fraud_attempt" => Self::FraudAttempt,
-            "note_cleared_return" => Self::NoteClearedFromFront,
-            "note_cleared_stack" => Self::NoteClearedIntoCashbox,
+            "note_cleared_return" | "note_cleared_from_front" => Self::NoteClearedFromFront,
+            "note_cleared_stack" | "note_cleared_into_cashbox" => Self::NoteClearedIntoCashbox,
             "note_credit" => Self::NoteCredit,
-            "cash_insertion" => Self::Read,
+            "cash_insertion" | "read" => Self::Read,
             "rejected" => Self::Rejected,
             "rejecting" => Self::Rejecting,
             "reset" => Self::Reset,
             "stacked" => Self::Stacked,
+            "stacker_full" => Self::StackerFull,
             "stacking" => Self::Stacking,
             "unsafe_jam" => Self::UnsafeJam,
             "fail" => Self::Fail,
@@ -257,4 +266,276 @@ impl fmt::Display for Method {
     }
 }
 
+impl serde::Serialize for Method {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match *self {
+            Self::Disable => serializer.serialize_unit_variant("Method", 0, "disable"),
+            Self::Stop => serializer.serialize_unit_variant("Method", 1, "stop"),
+            Self::Enable => serializer.serialize_unit_variant("Method", 2, "enable"),
+            Self::Accept => serializer.serialize_unit_variant("Method", 3, "accept"),
+            Self::Reject => serializer.serialize_unit_variant("Method", 4, "reject"),
+            Self::Stack => serializer.serialize_unit_variant("Method", 5, "stack"),
+            Self::Status => serializer.serialize_unit_variant("Method", 6, "status"),
+            Self::Shutdown => serializer.serialize_unit_variant("Method", 7, "shutdown"),
+            Self::CashboxRemoved => {
+                serializer.serialize_unit_variant("Method", 8, "cashbox_removed")
+            }
+            Self::CashboxReplaced => {
+                serializer.serialize_unit_variant("Method", 9, "cashbox_replaced")
+            }
+            Self::Disabled => serializer.serialize_unit_variant("Method", 10, "disabled"),
+            Self::FraudAttempt => serializer.serialize_unit_variant("Method", 11, "fraud_attempt"),
+            Self::NoteClearedFromFront => {
+                serializer.serialize_unit_variant("Method", 12, "note_cleared_return")
+            }
+            Self::NoteClearedIntoCashbox => {
+                serializer.serialize_unit_variant("Method", 13, "note_cleared_stack")
+            }
+            Self::NoteCredit => serializer.serialize_unit_variant("Method", 14, "note_credit"),
+            Self::Read => serializer.serialize_unit_variant("Method", 15, "cash_insertion"),
+            Self::Rejected => serializer.serialize_unit_variant("Method", 16, "rejected"),
+            Self::Rejecting => serializer.serialize_unit_variant("Method", 17, "rejecting"),
+            Self::Reset => serializer.serialize_unit_variant("Method", 18, "reset"),
+            Self::Stacked => serializer.serialize_unit_variant("Method", 19, "stacked"),
+            Self::StackerFull => serializer.serialize_unit_variant("Method", 20, "stacker_full"),
+            Self::Stacking => serializer.serialize_unit_variant("Method", 21, "stacking"),
+            Self::UnsafeJam => serializer.serialize_unit_variant("Method", 22, "unsafe_jam"),
+            Self::Fail => serializer.serialize_unit_variant("Method", 23, "fail"),
+            Self::Reserved(_) => serializer.serialize_unit_variant("Method", 0xff, "reserved"),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Method {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Method, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        struct MethodVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for MethodVisitor {
+            type Value = Method;
+
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("`disable` `stop` `enable` `accept` `reject` `stack` `status` `shutdown` `cashbox_removed` `cashbox_replaced` `disabled` `fraud_attempt` `note_cleared_from_front` `note_cleared_return` `note_cleared_into_cashbox` `note_cleared_stack` `note_credit` `read` `rejected` `rejecting` `reset` `stacked` `stacker_full` `stacking` `unsafe_jam` `fail` `reserved`")
+            }
+
+            fn visit_str<E>(self, value: &str) -> std::result::Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(Method::from(value.to_lowercase().as_str()))
+            }
+        }
+
+        deserializer.deserialize_identifier(MethodVisitor)
+    }
+}
+
 impl_default!(Method);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[cfg(feature = "jsonrpc")]
+    #[test]
+    fn test_method_serialize() -> Result<()> {
+        assert_eq!(
+            serde_json::to_string(&Method::Disable)?.as_str(),
+            "\"disable\""
+        );
+        assert_eq!(serde_json::to_string(&Method::Stop)?.as_str(), "\"stop\"");
+        assert_eq!(
+            serde_json::to_string(&Method::Enable)?.as_str(),
+            "\"enable\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Accept)?.as_str(),
+            "\"accept\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Reject)?.as_str(),
+            "\"reject\""
+        );
+        assert_eq!(serde_json::to_string(&Method::Stack)?.as_str(), "\"stack\"");
+        assert_eq!(
+            serde_json::to_string(&Method::Status)?.as_str(),
+            "\"status\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Shutdown)?.as_str(),
+            "\"shutdown\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::CashboxRemoved)?.as_str(),
+            "\"cashbox_removed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::CashboxReplaced)?.as_str(),
+            "\"cashbox_replaced\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Disabled)?.as_str(),
+            "\"disabled\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::FraudAttempt)?.as_str(),
+            "\"fraud_attempt\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::NoteClearedFromFront)?.as_str(),
+            "\"note_cleared_return\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::NoteClearedIntoCashbox)?.as_str(),
+            "\"note_cleared_stack\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::NoteCredit)?.as_str(),
+            "\"note_credit\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Read)?.as_str(),
+            "\"cash_insertion\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Rejected)?.as_str(),
+            "\"rejected\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Rejecting)?.as_str(),
+            "\"rejecting\""
+        );
+        assert_eq!(serde_json::to_string(&Method::Reset)?.as_str(), "\"reset\"");
+        assert_eq!(
+            serde_json::to_string(&Method::Stacked)?.as_str(),
+            "\"stacked\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::StackerFull)?.as_str(),
+            "\"stacker_full\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::Stacking)?.as_str(),
+            "\"stacking\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Method::UnsafeJam)?.as_str(),
+            "\"unsafe_jam\""
+        );
+        assert_eq!(serde_json::to_string(&Method::Fail)?.as_str(), "\"fail\"");
+
+        for i in 0..0xff {
+            assert_eq!(
+                serde_json::to_string(&Method::Reserved(i))?.as_str(),
+                "\"reserved\""
+            );
+        }
+
+        Ok(())
+    }
+
+    #[cfg(feature = "jsonrpc")]
+    #[test]
+    fn test_method_deserialize() -> Result<()> {
+        assert_eq!(
+            serde_json::from_str::<Method>("\"disable\"")?,
+            Method::Disable
+        );
+        assert_eq!(serde_json::from_str::<Method>("\"stop\"")?, Method::Stop);
+        assert_eq!(
+            serde_json::from_str::<Method>("\"enable\"")?,
+            Method::Enable
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"accept\"")?,
+            Method::Accept
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"reject\"")?,
+            Method::Reject
+        );
+        assert_eq!(serde_json::from_str::<Method>("\"stack\"")?, Method::Stack);
+        assert_eq!(
+            serde_json::from_str::<Method>("\"status\"")?,
+            Method::Status
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"shutdown\"")?,
+            Method::Shutdown
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"cashbox_removed\"")?,
+            Method::CashboxRemoved
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"cashbox_replaced\"")?,
+            Method::CashboxReplaced
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"disabled\"")?,
+            Method::Disabled
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"fraud_attempt\"")?,
+            Method::FraudAttempt
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"note_cleared_from_front\"")?,
+            Method::NoteClearedFromFront
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"note_cleared_return\"")?,
+            Method::NoteClearedFromFront
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"note_cleared_into_cashbox\"")?,
+            Method::NoteClearedIntoCashbox
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"note_cleared_stack\"")?,
+            Method::NoteClearedIntoCashbox
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"note_credit\"")?,
+            Method::NoteCredit
+        );
+        assert_eq!(serde_json::from_str::<Method>("\"read\"")?, Method::Read);
+        assert_eq!(
+            serde_json::from_str::<Method>("\"rejected\"")?,
+            Method::Rejected
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"rejecting\"")?,
+            Method::Rejecting
+        );
+        assert_eq!(serde_json::from_str::<Method>("\"reset\"")?, Method::Reset);
+        assert_eq!(
+            serde_json::from_str::<Method>("\"stacked\"")?,
+            Method::Stacked
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"stacker_full\"")?,
+            Method::StackerFull
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"stacking\"")?,
+            Method::Stacking
+        );
+        assert_eq!(
+            serde_json::from_str::<Method>("\"unsafe_jam\"")?,
+            Method::UnsafeJam
+        );
+        assert_eq!(serde_json::from_str::<Method>("\"fail\"")?, Method::Fail);
+        assert_eq!(
+            serde_json::from_str::<Method>("\"reserved\"")?,
+            Method::Reserved(0xff)
+        );
+
+        Ok(())
+    }
+}
