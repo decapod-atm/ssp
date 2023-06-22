@@ -3,15 +3,15 @@ use crate::{std::fmt, DeviceStatus};
 use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Status](crate::ResponseStatus::Status) event.
-#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct StatusEvent {
-    status: DeviceStatus,
+    details: DeviceStatus,
 }
 
 impl StatusEvent {
     /// Creates a new [StatusEvent].
-    pub const fn new(status: DeviceStatus) -> Self {
-        Self { status }
+    pub const fn new(details: DeviceStatus) -> Self {
+        Self { details }
     }
 
     /// Gets the [Method] for the [StatusEvent].
@@ -26,7 +26,7 @@ impl StatusEvent {
 
     /// Gets a reference to the [DeviceStatus].
     pub const fn device_status(&self) -> &DeviceStatus {
-        &self.status
+        &self.details
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -56,8 +56,21 @@ impl fmt::Display for StatusEvent {
     }
 }
 
-impl Default for StatusEvent {
-    fn default() -> Self {
-        Self::new(DeviceStatus::default())
+#[cfg(test)]
+mod tests {
+    #[cfg(feature = "jsonrpc")]
+    use super::*;
+    #[cfg(feature = "jsonrpc")]
+    use crate::Result;
+
+    #[cfg(feature = "jsonrpc")]
+    #[test]
+    fn test_status_event_serde() -> Result<()> {
+        let event = StatusEvent::default();
+        let exp_event_str = "{\"details\":{\"status\":\"Ok\",\"unit_type\":0,\"firmware_version\":0,\"country_code\":0,\"value_multiplier\":0,\"protocol_version\":\"Reserved\",\"cashbox_attached\":false}}";
+
+        assert_eq!(serde_json::to_string(&event)?.as_str(), exp_event_str);
+
+        Ok(())
     }
 }

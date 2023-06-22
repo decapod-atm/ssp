@@ -199,8 +199,9 @@ impl fmt::Display for DeviceStatus {
         let country_code = self.country_code();
         let vm = self.value_multiplier();
         let protocol = self.protocol_version();
+        let cashbox = self.cashbox_attached();
 
-        write!(f, "{o}\"response_status\": \"{status}\", \"unit_type\": {unit_type}, \"firmware_version\": \"{firmware}\", \"country_code\": \"{country_code}\", \"value_multiplier\": {vm}, \"protocol_version\": \"{protocol}\"{c}")
+        write!(f, "{o}\"response_status\": \"{status}\", \"unit_type\": {unit_type}, \"firmware_version\": \"{firmware}\", \"country_code\": \"{country_code}\", \"value_multiplier\": {vm}, \"protocol_version\": \"{protocol}\", \"cashbox_attached\": {cashbox}{c}")
     }
 }
 
