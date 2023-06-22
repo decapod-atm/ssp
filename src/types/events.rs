@@ -104,6 +104,35 @@ impl EventPayload {
             Self::UnsafeJamEvent(_) => UnsafeJamEvent::method(),
         }
     }
+
+    #[cfg(feature = "jsonrpc")]
+    pub fn to_json(&self) -> serde_json::Value {
+        use serde_json::json;
+
+        match self {
+            Self::Error(evt) => json!(evt),
+            Self::DisableEvent(evt) => json!(evt),
+            Self::EnableEvent(evt) => json!(evt),
+            Self::RejectEvent(evt) => json!(evt),
+            Self::StackEvent(evt) => json!(evt),
+            Self::StatusEvent(evt) => json!(evt),
+            Self::CashboxRemovedEvent(evt) => json!(evt),
+            Self::CashboxReplacedEvent(evt) => json!(evt),
+            Self::DisabledEvent(evt) => json!(evt),
+            Self::FraudAttemptEvent(evt) => json!(evt),
+            Self::NoteClearedFromFrontEvent(evt) => json!(evt),
+            Self::NoteClearedIntoCashboxEvent(evt) => json!(evt),
+            Self::NoteCreditEvent(evt) => json!(evt),
+            Self::ReadEvent(evt) => json!(evt),
+            Self::RejectedEvent(evt) => json!(evt),
+            Self::RejectingEvent(evt) => json!(evt),
+            Self::ResetEvent(evt) => json!(evt),
+            Self::StackedEvent(evt) => json!(evt),
+            Self::StackerFullEvent(evt) => json!(evt),
+            Self::StackingEvent(evt) => json!(evt),
+            Self::UnsafeJamEvent(evt) => json!(evt),
+        }
+    }
 }
 
 impl fmt::Display for EventPayload {
