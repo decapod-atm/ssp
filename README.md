@@ -10,14 +10,14 @@ By default, `ssp` is a `no-std` compatible library. To use in your project:
 
 ```
 # Cargo.toml
-ssp = "0.1"
+ssp = "0.3"
 ```
 
 If you would like to use `std`-only features:
 
 ```
 # Cargo.toml
-ssp = { version = "0.1", features = ["std"] }
+ssp = { version = "0.3", features = ["std"] }
 ```
 
 ## CAUTION
