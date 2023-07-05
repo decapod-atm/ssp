@@ -85,6 +85,8 @@ pub mod tests {
 
         assert_eq!(dec_cmd.data(), enc_cmd.data());
 
+        dec_cmd.verify_checksum()?;
+
         Ok(())
     }
 
@@ -106,6 +108,8 @@ pub mod tests {
         let dec_res = EncryptedResponse::decrypt(&key, wrap_msg);
 
         assert_eq!(dec_res.data(), enc_res.data());
+
+        dec_res.verify_checksum()?;
 
         Ok(())
     }

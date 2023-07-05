@@ -57,27 +57,16 @@ pub trait MessageOps {
         self.metadata_len() + self.data_len()
     }
 
-    /// Gets the length of the data bytes in the message buffer.
-    fn data_len(&self) -> usize {
-        let buf = self.buf();
-        let inited = buf[index::LEN] != 0;
-
-        if inited {
-            buf[index::LEN] as usize
-        } else {
-            buf.len() - self.metadata_len()
-        }
-    }
-
-    /// Sets the data length field in the message buffer.
-    fn set_data_len(&mut self, len: u8) {
-        self.buf_mut()[index::LEN] = len;
-    }
-
     /// Gets the length of the metadata fields in the message buffer.
     fn metadata_len(&self) -> usize {
         super::len::METADATA
     }
+
+    /// Gets the data length of the message.
+    fn data_len(&self) -> usize;
+
+    /// Sets the data length of the message.
+    fn set_data_len(&mut self, len: u8);
 
     /// Gets whether the message contains any data bytes.
     fn is_empty(&self) -> bool {
@@ -85,14 +74,7 @@ pub trait MessageOps {
     }
 
     /// Common field initialization.
-    fn init(&mut self) {
-        let data_len = self.data_len();
-        let buf = self.buf_mut();
-
-        buf[index::STX] = STX;
-        buf[index::SEQ_ID] = SequenceId::new().into();
-        buf[index::LEN] = data_len as u8;
-    }
+    fn init(&mut self);
 
     /// Gets the STX byte.
     fn stx(&self) -> u8 {

@@ -189,6 +189,7 @@ impl EncryptedResponse {
         let aes = aes::Aes128::new(key);
 
         self.set_packing();
+        self.calculate_checksum();
 
         let mut enc_msg = WrappedEncryptedMessage::new();
 
