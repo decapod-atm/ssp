@@ -173,7 +173,7 @@ macro_rules! from_event_for_payload {
 
         impl From<&$event> for EventPayload {
             fn from(val: &$event) -> Self {
-                Self::$event(*val)
+                Self::$event(val.clone())
             }
         }
 

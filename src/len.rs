@@ -76,6 +76,10 @@ pub const DISABLE_RESPONSE: usize = 6;
 pub const ENABLE_COMMAND: usize = 6;
 /// Enable Response full message length.
 pub const ENABLE_RESPONSE: usize = 6;
+/// Dataset Version Command full message length.
+pub const DATASET_VERSION_COMMAND: usize = 6;
+/// Dataset Version Response full message length.
+pub const DATASET_VERSION_RESPONSE: usize = MAX_MESSAGE;
 /// Empty Command full message length.
 pub const EMPTY_COMMAND: usize = 6;
 /// Empty Response full message length.

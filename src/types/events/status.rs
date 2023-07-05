@@ -3,7 +3,7 @@ use crate::{std::fmt, DeviceStatus};
 use super::{Method, CLOSE_BRACE, OPEN_BRACE};
 
 /// Represents a [Status](crate::ResponseStatus::Status) event.
-#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct StatusEvent {
     details: DeviceStatus,
 }

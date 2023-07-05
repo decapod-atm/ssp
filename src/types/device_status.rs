@@ -1,3 +1,5 @@
+use alloc::string::String;
+
 use crate::std::sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering};
 
 use crate::{
@@ -11,7 +13,7 @@ use super::{
 
 /// Represents the status of the device.
 #[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct DeviceStatus {
     status: ResponseStatus,
     unit_type: UnitType,
@@ -19,6 +21,7 @@ pub struct DeviceStatus {
     country_code: CountryCode,
     value_multiplier: ValueMultiplier,
     protocol_version: ProtocolVersion,
+    dataset_version: String,
     cashbox_attached: bool,
 }
 
@@ -32,6 +35,7 @@ impl DeviceStatus {
             country_code: CountryCode::from_inner(0),
             value_multiplier: ValueMultiplier::from_inner(0),
             protocol_version: ProtocolVersion::Reserved,
+            dataset_version: String::new(),
             cashbox_attached: false,
         }
     }
@@ -131,6 +135,22 @@ impl DeviceStatus {
         self
     }
 
+    /// Gets the dataset version.
+    pub fn dataset_version(&self) -> &str {
+        self.dataset_version.as_str()
+    }
+
+    /// Sets the dataset version.
+    pub fn set_dataset_version(&mut self, dataset_version: &str) {
+        self.dataset_version = dataset_version.into();
+    }
+
+    /// Builder function that sets the dataset version.
+    pub fn with_dataset_version(mut self, dataset_version: &str) -> Self {
+        self.set_dataset_version(dataset_version);
+        self
+    }
+
     /// Gets whether the cashbox is attached.
     pub const fn cashbox_attached(&self) -> bool {
         self.cashbox_attached
@@ -157,6 +177,7 @@ impl From<&SetupRequestResponse> for DeviceStatus {
             country_code: val.country_code(),
             value_multiplier: val.value_multiplier(),
             protocol_version: val.protocol_version().unwrap_or(ProtocolVersion::Reserved),
+            dataset_version: String::new(),
             cashbox_attached: false,
         }
     }
@@ -177,6 +198,7 @@ impl From<&UnitDataResponse> for DeviceStatus {
             country_code: val.country_code(),
             value_multiplier: val.value_multiplier(),
             protocol_version: val.protocol_version(),
+            dataset_version: String::new(),
             cashbox_attached: false,
         }
     }
@@ -199,9 +221,10 @@ impl fmt::Display for DeviceStatus {
         let country_code = self.country_code();
         let vm = self.value_multiplier();
         let protocol = self.protocol_version();
+        let dataset = self.dataset_version();
         let cashbox = self.cashbox_attached();
 
-        write!(f, "{o}\"response_status\": \"{status}\", \"unit_type\": {unit_type}, \"firmware_version\": \"{firmware}\", \"country_code\": \"{country_code}\", \"value_multiplier\": {vm}, \"protocol_version\": \"{protocol}\", \"cashbox_attached\": {cashbox}{c}")
+        write!(f, "{o}\"response_status\": \"{status}\", \"unit_type\": {unit_type}, \"firmware_version\": \"{firmware}\", \"country_code\": \"{country_code}\", \"value_multiplier\": {vm}, \"protocol_version\": \"{protocol}\", \"dataset_version\": \"{dataset}\", \"cashbox_attached\": {cashbox}{c}")
     }
 }
 

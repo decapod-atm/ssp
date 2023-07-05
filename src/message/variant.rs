@@ -1,7 +1,7 @@
 use crate::{
-    ChannelValueDataResponse, ConfigureBezelResponse, DisableResponse, DisplayOffResponse,
-    DisplayOnResponse, EmptyResponse, EnableResponse, EncryptionResetResponse, Error,
-    EventAckResponse, GetBarcodeDataResponse, GetBarcodeInhibitResponse,
+    ChannelValueDataResponse, ConfigureBezelResponse, DatasetVersionResponse, DisableResponse,
+    DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnableResponse, EncryptionResetResponse,
+    Error, EventAckResponse, GetBarcodeDataResponse, GetBarcodeInhibitResponse,
     GetBarcodeReaderConfigurationResponse, HoldResponse, HostProtocolVersionResponse,
     LastRejectCodeResponse, MessageType, PollResponse, PollWithAckResponse, RejectResponse,
     RequestKeyExchangeResponse, ResponseOps, Result, SerialNumberResponse,
@@ -18,6 +18,7 @@ pub enum MessageVariant {
     SetInhibitsResponse(SetInhibitsResponse),
     ChannelValueDataResponse(ChannelValueDataResponse),
     ConfigureBezelResponse(ConfigureBezelResponse),
+    DatasetVersionResponse(DatasetVersionResponse),
     DisableResponse(DisableResponse),
     DisplayOffResponse(DisplayOffResponse),
     DisplayOnResponse(DisplayOnResponse),
@@ -57,6 +58,9 @@ impl MessageVariant {
             }
             MessageType::ConfigureBezel => {
                 Self::ConfigureBezelResponse(ConfigureBezelResponse::new())
+            }
+            MessageType::DatasetVersion => {
+                Self::DatasetVersionResponse(DatasetVersionResponse::new())
             }
             MessageType::Disable => Self::DisableResponse(DisableResponse::new()),
             MessageType::DisplayOff => Self::DisplayOffResponse(DisplayOffResponse::new()),
@@ -120,6 +124,7 @@ impl MessageVariant {
             Self::SetInhibitsResponse(msg) => msg,
             Self::ChannelValueDataResponse(msg) => msg,
             Self::ConfigureBezelResponse(msg) => msg,
+            Self::DatasetVersionResponse(msg) => msg,
             Self::DisableResponse(msg) => msg,
             Self::DisplayOffResponse(msg) => msg,
             Self::DisplayOnResponse(msg) => msg,
@@ -157,6 +162,7 @@ impl MessageVariant {
             Self::SetInhibitsResponse(msg) => msg,
             Self::ChannelValueDataResponse(msg) => msg,
             Self::ConfigureBezelResponse(msg) => msg,
+            Self::DatasetVersionResponse(msg) => msg,
             Self::DisableResponse(msg) => msg,
             Self::DisplayOffResponse(msg) => msg,
             Self::DisplayOnResponse(msg) => msg,
@@ -265,6 +271,33 @@ impl MessageVariant {
     pub fn into_configure_bezel_response(self) -> Result<ConfigureBezelResponse> {
         match self {
             Self::ConfigureBezelResponse(msg) => Ok(msg),
+            _ => Err(Error::InvalidMessage(self.message_type())),
+        }
+    }
+
+    /// Gets whether the [MessageVariant] contains a [DatasetVersionResponse] message.
+    pub fn is_dataset_version_response(&self) -> bool {
+        matches!(self, Self::DatasetVersionResponse(_))
+    }
+
+    /// Gets a reference to the [MessageVariant] as a [DatasetVersionResponse].
+    ///
+    /// Returns an [Error] if the [MessageVariant] does not contain a [DatasetVersionResponse].
+    pub fn as_dataset_version_response(&self) -> Result<&DatasetVersionResponse> {
+        match self {
+            Self::DatasetVersionResponse(msg) => Ok(msg),
+            _ => Err(Error::InvalidMessage(self.message_type())),
+        }
+    }
+
+    /// Converts the [MessageVariant] into an [DatasetVersionResponse].
+    ///
+    /// Consumes the [MessageVariant].
+    ///
+    /// Returns an [Error] if the [MessageVariant] does not contain a [DatasetVersionResponse].
+    pub fn into_dataset_version_response(self) -> Result<DatasetVersionResponse> {
+        match self {
+            Self::DatasetVersionResponse(msg) => Ok(msg),
             _ => Err(Error::InvalidMessage(self.message_type())),
         }
     }
@@ -1049,6 +1082,9 @@ impl MessageVariant {
             )),
             MessageType::ConfigureBezel => Ok(Self::ConfigureBezelResponse(
                 ConfigureBezelResponse::try_from(buf)?,
+            )),
+            MessageType::DatasetVersion => Ok(Self::DatasetVersionResponse(
+                DatasetVersionResponse::try_from(buf)?,
             )),
             MessageType::Disable => Ok(Self::DisableResponse(DisableResponse::try_from(buf)?)),
             MessageType::DisplayOff => {
