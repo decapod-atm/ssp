@@ -13,6 +13,7 @@
 //!
 //! The current implementation supports both the standard (SSP), and encrypted variant (eSSP).
 
+#[macro_use(format)]
 extern crate alloc;
 
 #[macro_use(bitfield)]
@@ -25,6 +26,7 @@ use std;
 
 mod macros;
 
+pub mod aes;
 pub mod channel_value_data;
 mod channels;
 pub mod configure_bezel;
