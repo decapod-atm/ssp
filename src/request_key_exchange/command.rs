@@ -44,8 +44,8 @@ impl RequestKeyExchangeCommand {
     }
 
     /// Sets the [IntermediateKey].
-    pub fn set_intermediate_key(&mut self, inter: &IntermediateKey) {
-        let key_bytes = inter.as_inner().to_le_bytes();
+    pub fn set_intermediate_key(&mut self, key: &IntermediateKey) {
+        let key_bytes = key.as_inner().to_le_bytes();
         self.buf[index::INTER_KEY..index::INTER_KEY_END].copy_from_slice(key_bytes.as_ref());
     }
 }

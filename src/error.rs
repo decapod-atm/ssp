@@ -13,6 +13,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Error {
     Generic(i64),
+    Aes(String),
     Crc((u16, u16)),
     Encryption(ResponseStatus),
     InvalidBarcodeCharacters(u8),
@@ -40,6 +41,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Error::Aes(err) => write!(f, "AES error: {err}"),
             Error::Crc((have, exp)) => {
                 write!(f, "Bad CRC-16, have: 0x{have:04x}, expected: 0x{exp:04x}")
             }

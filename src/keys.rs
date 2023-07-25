@@ -1,8 +1,6 @@
 //! Keys for encrypted communication over `eSSP`.
 
 use aes::cipher::KeySizeUser;
-use num_bigint::BigUint;
-use num_traits::cast::ToPrimitive;
 use rand_chacha::{
     rand_core::{RngCore, SeedableRng},
     ChaCha20Rng,
@@ -13,6 +11,18 @@ use crate::{impl_default, make_key, primes::Generator, rng::Seed};
 /// All ITL devices use the same static prefixes in their AES encryption keys,
 /// effectively shortening the key-space to 64-bits...
 pub const DEFAULT_FIXED_KEY: [u8; 8] = [0x67, 0x45, 0x23, 0x01, 0x67, 0x45, 0x23, 0x01];
+pub const DEFAULT_FIXED_KEY_U64: u64 = 0x0123456701234567;
+
+fn pow_mod_big(x: u64, y: u64, n: u64) -> u64 {
+    use num_bigint::BigUint;
+    use num_traits::{FromPrimitive, ToPrimitive};
+
+    let xb = BigUint::from_u64(x).unwrap();
+    let yb = BigUint::from_u64(y).unwrap();
+    let nb = BigUint::from_u64(n).unwrap();
+
+    xb.modpow(&yb, &nb).to_u64().unwrap_or(0)
+}
 
 make_key!(
     GeneratorKey,
@@ -108,17 +118,8 @@ make_key!(
 
 impl IntermediateKey {
     pub fn from_keys(gen_key: &GeneratorKey, rnd_key: &RandomKey, mod_key: &ModulusKey) -> Self {
-        let gk = BigUint::from(gen_key.as_inner());
-        let rk = BigUint::from(rnd_key.as_inner());
-        let mk = BigUint::from(mod_key.as_inner());
-
         // (GeneratorKey ^ RandomKey) % ModKey
-        //
-        // The `unwrap` call will never panic because of the modulo operation.
-        //
-        // The result will always by representable as `u64`, as long as the modulus is a valid
-        // `u64`.
-        gk.modpow(&rk, &mk).to_u64().unwrap().into()
+        pow_mod_big(gen_key.as_inner(), rnd_key.as_inner(), mod_key.as_inner()).into()
     }
 }
 
@@ -144,17 +145,8 @@ impl EncryptionKey {
         rnd_key: &RandomKey,
         mod_key: &ModulusKey,
     ) -> Self {
-        let ik = BigUint::from(inter_key.as_inner());
-        let rk = BigUint::from(rnd_key.as_inner());
-        let mk = BigUint::from(mod_key.as_inner());
-
         // (InterKey ^ RandomKey) % ModKey
-        //
-        // The `unwrap` call will never panic because of the modulo operation.
-        //
-        // The result will always by representable as `u64`, as long as the modulus is a valid
-        // `u64`.
-        ik.modpow(&rk, &mk).to_u64().unwrap().into()
+        pow_mod_big(inter_key.as_inner(), rnd_key.as_inner(), mod_key.as_inner()).into()
     }
 }
 
@@ -163,7 +155,7 @@ make_key!(FixedKey, u64, r"Fixed part of the `eSSP` encryption key.");
 impl FixedKey {
     /// Creates a new [FixedKey] from the default ITL bytes.
     pub const fn new() -> Self {
-        Self::from_inner(u64::from_le_bytes(DEFAULT_FIXED_KEY))
+        Self::from_inner(DEFAULT_FIXED_KEY_U64)
     }
 
     /// Generates a random [FixedKey] from a seed.
@@ -224,8 +216,47 @@ mod tests {
 
     #[test]
     fn test_default_key() {
-        let exp_fixed_key = 0x0123456701234567u64.to_le_bytes();
+        let exp_fixed_key = DEFAULT_FIXED_KEY_U64.to_le_bytes();
 
         assert_eq!(DEFAULT_FIXED_KEY[..8].as_ref(), exp_fixed_key.as_ref());
+    }
+
+    #[test]
+    fn test_key_exchange() {
+        let gen = GeneratorKey::from_seed([0xde; 32]);
+        let modulus = ModulusKey::from_seed([0xaf; 32]);
+
+        let host_rnd = RandomKey::from_seed([0xaa; 32]);
+        let dev_rnd = RandomKey::from_seed([0xbb; 32]);
+
+        let host_inter = IntermediateKey::from_keys(&gen, &host_rnd, &modulus);
+        let dev_inter = IntermediateKey::from_keys(&gen, &dev_rnd, &modulus);
+
+        let host_enc = EncryptionKey::from_keys(&dev_inter, &host_rnd, &modulus);
+        let dev_enc = EncryptionKey::from_keys(&host_inter, &dev_rnd, &modulus);
+
+        assert_eq!(host_enc, dev_enc);
+    }
+
+    #[test]
+    fn test_known_keys() {
+        let gen = GeneratorKey::from_inner(0x7fcc_9ee3);
+        let modulus = ModulusKey::from_inner(0x7f1c_7181);
+
+        let host_rnd = RandomKey::from_inner(0x7f2b_ceec);
+        let host_inter = IntermediateKey::from_inner(0xc04_3f46);
+
+        let dev_inter = IntermediateKey::from_inner(0x634c_0016);
+
+        let encrypt_key = EncryptionKey::from_inner(0x7bf4_9046);
+
+        assert_eq!(
+            IntermediateKey::from_keys(&gen, &host_rnd, &modulus),
+            host_inter
+        );
+        assert_eq!(
+            EncryptionKey::from_keys(&dev_inter, &host_rnd, &modulus),
+            encrypt_key
+        );
     }
 }

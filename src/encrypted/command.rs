@@ -7,8 +7,7 @@ use crate::seed;
 
 use crate::{
     impl_command_display, impl_command_ops, impl_default, impl_encrypted_message_ops,
-    impl_message_from_buf, len, AesBlock, AesKey, CommandOps, Error, MessageOps, Result,
-    SequenceCount,
+    impl_message_from_buf, len, AesKey, CommandOps, Error, MessageOps, Result, SequenceCount,
 };
 
 use super::{index, WrappedEncryptedMessage};
@@ -186,25 +185,21 @@ impl EncryptedCommand {
     ///
     /// Converts the [EncryptedCommand] message into a standard [WrappedEncryptedMessage].
     pub fn encrypt(mut self, key: &AesKey) -> WrappedEncryptedMessage {
-        use aes::cipher::{BlockEncrypt, KeyInit};
-
-        let aes = aes::Aes128::new(key);
+        use crate::aes;
 
         self.set_packing();
+        self.calculate_checksum();
 
         let mut enc_msg = WrappedEncryptedMessage::new();
 
         let enc_len = self.len();
         enc_msg.set_data_len(enc_len as u8);
 
-        let enc_chunks = enc_msg.data_mut()[1..].chunks_exact_mut(len::AES);
-        let msg_chunks = self.encrypt_data().chunks_exact(len::AES);
+        let plain_data = self.encrypt_data();
+        let cipher_data = enc_msg.data_mut()[1..].as_mut();
 
-        for (msg_block, wrap_block) in msg_chunks.zip(enc_chunks) {
-            aes.encrypt_block_b2b(
-                AesBlock::from_slice(msg_block),
-                AesBlock::from_mut_slice(wrap_block),
-            );
+        if let Err(err) = aes::aes_encrypt_inplace(key.as_ref(), plain_data, cipher_data) {
+            log::error!("error encrypting message: {err}");
         }
 
         super::increment_sequence_count();
@@ -218,22 +213,17 @@ impl EncryptedCommand {
     ///
     /// **Note**: only useful if implmenting a device-side binary.
     pub fn decrypt(key: &AesKey, message: WrappedEncryptedMessage) -> Self {
-        use aes::cipher::{BlockDecrypt, KeyInit};
-
-        let aes = aes::Aes128::new(key);
+        use crate::aes;
 
         let mut dec_msg = Self::new();
         dec_msg.set_data_len(message.data_len().saturating_sub(len::ENCRYPTED_METADATA) as u8);
 
         // Skip the STEX (0x7E) byte, it's not encrypted/decrypted
-        let enc_chunks = message.data()[1..].chunks_exact(len::AES);
-        let dec_chunks = dec_msg.encrypt_data().chunks_exact_mut(len::AES);
+        let cipher_data = message.data()[1..].as_ref();
+        let plain_data = dec_msg.encrypt_data();
 
-        for (wrap_block, dec_block) in enc_chunks.zip(dec_chunks) {
-            aes.decrypt_block_b2b(
-                AesBlock::from_slice(wrap_block),
-                AesBlock::from_mut_slice(dec_block),
-            );
+        if let Err(err) = aes::aes_decrypt_inplace(key.as_ref(), cipher_data, plain_data) {
+            log::error!("error decrypting message: {err}");
         }
 
         super::increment_sequence_count();

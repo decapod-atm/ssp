@@ -1,5 +1,12 @@
 //! CRC-16 checksum calculation
 
+/// Seed for the CRC-16 algorithm used in SSP.
+pub const CRC_SEED: u16 = 0xffff;
+/// Polynomical for the CRC-16 algorithm used in SSP.
+///
+/// The highest polynomial is omitted.
+pub const CRC_POLY: u16 = 0x8005;
+
 /// The final 2 bytes are used for a Cyclic Redundancy Check (CRC). This is provided to detect
 /// errors during transmission. The CRC is calculated using a forward CRC-16 algorithm with
 /// the polynomial `(X16 + X15 + X2 + 1 = 0b1_1000_0000_0000_0101)`.
@@ -7,23 +14,21 @@
 /// It is calculated on all bytes except STX and initialised using the seed `0xFFFF`.
 ///
 /// The CRC is calculated before byte stuffing
-pub const SSP_CRC_ALG: crc::Algorithm<u16> = crc::Algorithm {
-    width: 16,
-    poly: 0x8005,
-    init: 0xffff,
-    refin: false,
-    refout: false,
-    xorout: 0x0000,
-    check: 0x0000,
-    residue: 0x0000,
-};
-
 pub fn crc16(data: &[u8]) -> u16 {
-    let crc = crc::Crc::<u16>::new(&SSP_CRC_ALG);
+    let mut crc = CRC_SEED;
 
-    let mut digest = crc.digest();
-    digest.update(data);
-    digest.finalize()
+    for &byte in data.iter() {
+        crc ^= (byte as u16) << 8;
+        for _ in 0..8 {
+            if crc & 0x8000 != 0 {
+                crc = (crc << 1) ^ CRC_POLY;
+            } else {
+                crc = crc.overflowing_shl(1).0;
+            }
+        }
+    }
+
+    crc
 }
 
 #[cfg(test)]
@@ -31,19 +36,33 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_ssp_crc_example() {
+        let data = [0x80, 0x01, 0x11];
+        let exp_crc = 0x8265;
+
+        assert_eq!(crc16(data.as_ref()), exp_crc);
+    }
+
+    #[test]
     fn test_ssp_crc() {
-        let data = [
+        let mut data = [
             0x80, 0x11, 0x7E, 0x92, 0x2C, 0xF0, 0xC6, 0x74, 0x40, 0xD1, 0x38, 0xB9, 0x17, 0x18,
-            0x4D, 0xFC, 0x76, 0x11, 0xB4,
+            0x4D, 0xFC, 0x76, 0x11, 0xB4, 0x00, 0x00,
         ];
-        let expected_crc = u16::from_le_bytes([0xe3, 0x66]);
+        let exp_crc = 0x66e3u16;
+        let exp_crc_bytes = exp_crc.to_be_bytes();
 
         assert_eq!(
-            crc16(data.as_ref()),
-            expected_crc,
-            "have: 0x{:04x}, expected: 0x{expected_crc:04x}",
-            crc16(data.as_ref())
+            crc16(data[..data.len() - 2].as_ref()),
+            exp_crc,
+            "have: 0x{:04x}, expected: 0x{exp_crc:04x}",
+            crc16(data[..data.len() - 2].as_ref())
         );
+
+        let len = data.len();
+        data[len - 2..].copy_from_slice(exp_crc_bytes.as_ref());
+
+        assert_eq!(crc16(data.as_ref()), 0);
     }
 
     #[test]

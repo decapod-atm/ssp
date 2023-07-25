@@ -370,12 +370,39 @@ macro_rules! impl_default {
 macro_rules! impl_message_ops {
     ($name:ident) => {
         impl $crate::MessageOps for $name {
+            fn init(&mut self) {
+                use $crate::message::index;
+                let data_len = self.data_len();
+
+                self.buf[index::STX] = $crate::STX;
+                self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
+                self.buf[index::LEN] = data_len as u8;
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
+            }
+
+            fn data_len(&self) -> usize {
+                use $crate::message::index;
+                let inited = self.buf[index::LEN] != 0;
+
+                if inited {
+                    self.buf[index::LEN] as usize
+                } else {
+                    self.buf.len() - self.metadata_len()
+                }
+            }
+
+            fn set_data_len(&mut self, len: u8) {
+                use $crate::message::index;
+                self.buf[index::LEN] = len;
             }
 
             fn message_type(&self) -> $crate::MessageType {
@@ -390,12 +417,39 @@ macro_rules! impl_message_ops {
 
     ($name:ident, $msg_type:ident::$variant:tt) => {
         impl $crate::MessageOps for $name {
+            fn init(&mut self) {
+                use $crate::message::index;
+                let data_len = self.data_len();
+
+                self.buf[index::STX] = $crate::STX;
+                self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
+                self.buf[index::LEN] = data_len as u8;
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
+            }
+
+            fn data_len(&self) -> usize {
+                use $crate::message::index;
+                let inited = self.buf[index::LEN] != 0;
+
+                if inited {
+                    self.buf[index::LEN] as usize
+                } else {
+                    self.buf.len() - self.metadata_len()
+                }
+            }
+
+            fn set_data_len(&mut self, len: u8) {
+                use $crate::message::index;
+                self.buf[index::LEN] = len;
             }
 
             fn message_type(&self) -> $msg_type {
@@ -415,16 +469,44 @@ macro_rules! impl_message_ops {
 macro_rules! impl_var_message_ops {
     ($name:ident) => {
         impl $crate::MessageOps for $name {
+            fn init(&mut self) {
+                use $crate::message::index;
+
+                let data_len = self.data_len();
+
+                self.buf[index::STX] = $crate::STX;
+                self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
+                self.buf[index::LEN] = data_len as u8;
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
             }
 
             fn message_type(&self) -> $crate::MessageType {
                 self.buf[$crate::message::index::COMMAND].into()
+            }
+
+            fn data_len(&self) -> usize {
+                use $crate::message::index;
+                let inited = self.buf[index::LEN] != 0;
+
+                if inited {
+                    self.buf[index::LEN] as usize
+                } else {
+                    self.buf.len() - self.metadata_len()
+                }
+            }
+
+            fn set_data_len(&mut self, len: u8) {
+                use $crate::message::index;
+                self.buf[index::LEN] = len;
             }
 
             fn is_command(&self) -> bool {
@@ -444,16 +526,44 @@ macro_rules! impl_var_message_ops {
 
     ($name:ident, $msg_type:ident::$variant:tt) => {
         impl MessageOps for $name {
+            fn init(&mut self) {
+                use $crate::message::index;
+
+                let data_len = self.data_len();
+
+                self.buf[index::STX] = $crate::STX;
+                self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
+                self.buf[index::LEN] = data_len as u8;
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
             }
 
             fn message_type(&self) -> $msg_type {
                 $msg_type::$variant
+            }
+
+            fn data_len(&self) -> usize {
+                use $crate::message::index;
+                let inited = self.buf[index::LEN] != 0;
+
+                if inited {
+                    self.buf[index::LEN] as usize
+                } else {
+                    self.buf.len() - self.metadata_len()
+                }
+            }
+
+            fn set_data_len(&mut self, len: u8) {
+                use $crate::message::index;
+                self.buf[index::LEN] = len;
             }
 
             fn is_command(&self) -> bool {
@@ -466,7 +576,7 @@ macro_rules! impl_var_message_ops {
 
             fn len(&self) -> usize {
                 // Read the LEN message field, because the actual length is variable.
-                (self.buf[$crate::message::index::LEN] as usize) + $crate::len::METADATA
+                self.data_len() + $crate::len::METADATA
             }
         }
     };
@@ -478,12 +588,24 @@ macro_rules! impl_var_message_ops {
 macro_rules! impl_encrypted_message_ops {
     ($name:ident) => {
         impl $crate::MessageOps for $name {
+            fn init(&mut self) {
+                self.buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
+
+                let count_start = $crate::encrypted::index::COUNT;
+                let count_end = $crate::encrypted::index::COUNT_END;
+                let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
+
+                self.buf[count_start..count_end].copy_from_slice(count.as_ref());
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
             }
 
             fn message_type(&self) -> $crate::MessageType {
@@ -498,18 +620,6 @@ macro_rules! impl_encrypted_message_ops {
                 true
             }
 
-            fn init(&mut self) {
-                let buf = self.buf_mut();
-
-                buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
-
-                let count_start = $crate::encrypted::index::COUNT;
-                let count_end = $crate::encrypted::index::COUNT_END;
-                let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
-
-                buf[count_start..count_end].copy_from_slice(count.as_ref());
-            }
-
             fn len(&self) -> usize {
                 // Read the LEN message field, because the actual length is variable.
                 let meta = self.metadata_len();
@@ -520,14 +630,11 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn data_len(&self) -> usize {
-                let buf = self.buf();
-                let len_idx = $crate::encrypted::index::LEN;
-
-                buf[len_idx] as usize
+                self.buf[$crate::encrypted::index::LEN] as usize
             }
 
             fn set_data_len(&mut self, len: u8) {
-                self.buf_mut()[$crate::encrypted::index::LEN] = len;
+                self.buf[$crate::encrypted::index::LEN] = len;
             }
 
             fn metadata_len(&self) -> usize {
@@ -538,11 +645,11 @@ macro_rules! impl_encrypted_message_ops {
                 use $crate::encrypted::index;
 
                 let len = self.len();
-                let buf = self.buf_mut();
+
                 let crc_start = len - 2;
 
-                let crc = $crate::crc::crc16(buf[index::LEN..crc_start].as_ref());
-                buf[crc_start..len].copy_from_slice(crc.to_le_bytes().as_ref());
+                let crc = $crate::crc::crc16(self.buf[index::LEN..crc_start].as_ref());
+                self.buf[crc_start..len].copy_from_slice(crc.to_le_bytes().as_ref());
 
                 crc
             }
@@ -567,12 +674,24 @@ macro_rules! impl_encrypted_message_ops {
 
     ($name:ident, $msg_type:ident::$variant:tt) => {
         impl MessageOps for $name {
+            fn init(&mut self) {
+                self.buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
+
+                let count_start = $crate::encrypted::index::COUNT;
+                let count_end = $crate::encrypted::index::COUNT_END;
+                let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
+
+                self.buf[count_start..count_end].copy_from_slice(count.as_ref());
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.len();
+                self.buf[..len].as_mut()
             }
 
             fn message_type(&self) -> $msg_type {
@@ -585,18 +704,6 @@ macro_rules! impl_encrypted_message_ops {
 
             fn is_variable(&self) -> bool {
                 true
-            }
-
-            fn init(&mut self) {
-                let buf = self.buf_mut();
-
-                buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
-
-                let count_start = $crate::encrypted::index::COUNT;
-                let count_end = $crate::encrypted::index::COUNT_END;
-                let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
-
-                buf[count_start..count_end].copy_from_slice(count.as_ref());
             }
 
             fn len(&self) -> usize {
@@ -658,12 +765,40 @@ macro_rules! impl_encrypted_message_ops {
 macro_rules! impl_wrapped_message_ops {
     ($name:ident) => {
         impl $crate::MessageOps for $name {
+            fn init(&mut self) {
+                use $crate::message::index;
+
+                let data_len = self.data_len();
+
+                self.buf[index::STX] = $crate::STX;
+                self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
+                self.buf[index::LEN] = data_len as u8;
+            }
+
             fn buf(&self) -> &[u8] {
-                self.buf.as_ref()
+                let len = self.data_len() + self.metadata_len();
+                self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                self.buf.as_mut()
+                let len = self.data_len() + self.metadata_len();
+                self.buf[..len].as_mut()
+            }
+
+            fn data_len(&self) -> usize {
+                use $crate::message::index;
+                let inited = self.buf[index::LEN] != 0;
+
+                if inited {
+                    self.buf[index::LEN] as usize
+                } else {
+                    self.buf.len() - self.metadata_len()
+                }
+            }
+
+            fn set_data_len(&mut self, len: u8) {
+                use $crate::message::index;
+                self.buf[index::LEN] = len;
             }
 
             fn message_type(&self) -> $crate::MessageType {

@@ -31,16 +31,16 @@ impl RequestKeyExchangeResponse {
 
     /// Gets the [IntermediateKey].
     pub fn intermediate_key(&self) -> IntermediateKey {
-        let mod_bytes: [u8; 8] = self.buf[index::INTER_KEY..index::INTER_KEY_END]
+        let key_bytes: [u8; 8] = self.buf[index::INTER_KEY..index::INTER_KEY_END]
             .try_into()
             .unwrap();
-        u64::from_le_bytes(mod_bytes).into()
+        u64::from_le_bytes(key_bytes).into()
     }
 
     /// Sets the [IntermediateKey].
-    pub fn set_intermediate_key(&mut self, modulus: IntermediateKey) {
-        let gen_bytes = modulus.as_inner().to_le_bytes();
-        self.buf[index::INTER_KEY..index::INTER_KEY_END].copy_from_slice(gen_bytes.as_ref());
+    pub fn set_intermediate_key(&mut self, key: IntermediateKey) {
+        let key_bytes = key.as_inner().to_le_bytes();
+        self.buf[index::INTER_KEY..index::INTER_KEY_END].copy_from_slice(key_bytes.as_ref());
     }
 }
 
