@@ -182,6 +182,9 @@ impl EncryptedResponse {
     /// Encrypts and consumes the [EncryptedResponse] message.
     ///
     /// Converts the [EncryptedResponse] message into a standard [WrappedEncryptedMessage].
+    ///
+    /// **Note**: only useful if implementing a device-side binary, and/or testing host-side
+    /// functionality.
     pub fn encrypt(mut self, key: &AesKey) -> WrappedEncryptedMessage {
         use crate::aes;
 
@@ -202,14 +205,22 @@ impl EncryptedResponse {
 
         super::increment_sequence_count();
 
+        if let Err(err) = enc_msg.stuff_encrypted_data() {
+            log::error!("error stuffing encrypted response message: {err}");
+        }
+
         enc_msg
     }
 
     /// Decrypts and consumes the [WrappedEncryptedMessage].
     ///
     /// Converts the [WrappedEncryptedMessage] into an [EncryptedResponse].
-    pub fn decrypt(key: &AesKey, message: WrappedEncryptedMessage) -> Self {
+    pub fn decrypt(key: &AesKey, mut message: WrappedEncryptedMessage) -> Self {
         use crate::aes;
+
+        if let Err(err) = message.unstuff_encrypted_data() {
+            log::error!("error unstuffing encrypted response message: {err}");
+        }
 
         let mut dec_msg = Self::new();
         dec_msg.set_data_len(message.data_len().saturating_sub(len::ENCRYPTED_METADATA) as u8);
