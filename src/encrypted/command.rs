@@ -204,6 +204,10 @@ impl EncryptedCommand {
 
         super::increment_sequence_count();
 
+        if let Err(err) = enc_msg.stuff_encrypted_data() {
+            log::error!("error stuffing encrypted command message: {err}");
+        }
+
         enc_msg
     }
 
@@ -211,9 +215,14 @@ impl EncryptedCommand {
     ///
     /// Converts the [WrappedEncryptedMessage] into an [EncryptedCommand].
     ///
-    /// **Note**: only useful if implmenting a device-side binary.
-    pub fn decrypt(key: &AesKey, message: WrappedEncryptedMessage) -> Self {
+    /// **Note**: only useful if implementing a device-side binary, and/or testing host-side
+    /// functionality.
+    pub fn decrypt(key: &AesKey, mut message: WrappedEncryptedMessage) -> Self {
         use crate::aes;
+
+        if let Err(err) = message.unstuff_encrypted_data() {
+            log::error!("error unstuffing encrypted command message: {err}");
+        }
 
         let mut dec_msg = Self::new();
         dec_msg.set_data_len(message.data_len().saturating_sub(len::ENCRYPTED_METADATA) as u8);
