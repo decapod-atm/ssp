@@ -3,7 +3,7 @@ use crate::{
     impl_var_message_ops, len, IntermediateKey, MessageOps, MessageType,
 };
 
-pub mod index {
+mod index {
     pub const INTER_KEY: usize = 4;
     pub const INTER_KEY_END: usize = 12;
 }

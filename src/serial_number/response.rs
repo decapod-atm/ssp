@@ -3,7 +3,7 @@ use crate::{
     len::SERIAL_NUMBER_RESPONSE, std::fmt, MessageOps, MessageType, ResponseOps, SerialNumber,
 };
 
-pub mod index {
+mod index {
     pub const SERIAL_NUMBER: usize = 4;
     pub const SERIAL_NUMBER_END: usize = 8;
 }

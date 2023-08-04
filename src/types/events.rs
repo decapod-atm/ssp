@@ -138,7 +138,7 @@ impl EventPayload {
 impl fmt::Display for EventPayload {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Error(err) => write!(f, "{OPEN_BRACE}\"error\": \"{err}\"{CLOSE_BRACE}"),
+            Self::Error(err) => write!(f, r#"{{"error": "{err}"}}"#),
             Self::DisableEvent(evt) => write!(f, "{evt}"),
             Self::EnableEvent(evt) => write!(f, "{evt}"),
             Self::RejectEvent(evt) => write!(f, "{evt}"),

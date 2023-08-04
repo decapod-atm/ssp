@@ -4,7 +4,7 @@ use crate::{
     MessageOps, MessageType, ProtocolVersion, ResponseOps, Result, UnitType, ValueMultiplier, Vec,
 };
 
-pub mod index {
+mod index {
     pub const UNIT_TYPE: usize = 4;
     pub const FIRMWARE_VERSION: usize = 5;
     pub const FIRMWARE_VERSION_END: usize = 9;

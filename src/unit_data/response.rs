@@ -4,7 +4,7 @@ use crate::{
     ValueMultiplier,
 };
 
-pub mod index {
+mod index {
     use crate::len;
 
     pub const UNIT_TYPE: usize = 4;

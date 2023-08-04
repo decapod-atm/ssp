@@ -145,6 +145,15 @@ pub const SET_MODULUS_RESPONSE: usize = 6;
 pub const REQUEST_KEY_EXCHANGE_COMMAND: usize = 14;
 /// RequestKeyExchange Response full message length.
 pub const REQUEST_KEY_EXCHANGE_RESPONSE: usize = 14;
+/// PayoutByDenomination Command maximum full message length.
+///
+/// Because payout messages have variable lengths, set the static length to maximum
+/// possible. Actual length is determined by reading the LEN field.
+pub const PAYOUT_BY_DENOMINATION_COMMAND: usize = MAX_MESSAGE;
+/// PayoutByDenomination Response full message length.
+pub const PAYOUT_BY_DENOMINATION_RESPONSE: usize = 6;
+/// Length of a serialized [PayoutDenomination](crate::PayoutDenomination).
+pub const PAYOUT_BLOCK: usize = 9;
 /// Encrypted Command full message length.
 ///
 /// Because encrypted messages have variable lengths, set the static length to maximum

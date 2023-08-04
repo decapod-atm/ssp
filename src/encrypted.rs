@@ -4,12 +4,9 @@ use crate::std::{
     cmp,
     sync::atomic::{AtomicU32, Ordering},
 };
-use crate::{Error, Result, SequenceCount};
+use crate::{Error, Result, SequenceCount, STEX};
 
 static SEQUENCE_COUNT: AtomicU32 = AtomicU32::new(0);
-
-/// Represents the start of an encrypted packet.
-pub const STEX: u8 = 0x7e;
 
 mod command;
 mod response;
@@ -19,7 +16,7 @@ pub use command::*;
 pub use response::*;
 pub use wrapped::*;
 
-pub mod index {
+pub mod encrypted_index {
     pub const STEX: usize = 0;
     pub const LEN: usize = 1;
     pub const COUNT: usize = 2;

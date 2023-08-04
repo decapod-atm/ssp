@@ -3,7 +3,7 @@ use crate::{
     BarcodeTicketStatus, MessageOps, MessageType, ResponseOps,
 };
 
-pub mod index {
+mod index {
     pub const STATUS: usize = 4;
     pub const DATA_LEN: usize = 5;
     pub const DATA: usize = 6;

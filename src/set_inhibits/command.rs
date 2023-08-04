@@ -4,7 +4,7 @@ use crate::{
     Error, InhibitChannels, MessageOps, MessageType, Result, Vec,
 };
 
-pub mod index {
+mod index {
     pub const INHIBIT: usize = 4;
 }
 

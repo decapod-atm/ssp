@@ -4,7 +4,7 @@ use crate::{
     BarcodeHardwareStatus, MessageOps, MessageType, ResponseOps,
 };
 
-pub mod index {
+mod index {
     pub const HARDWARE_STATUS: usize = 4;
     pub const ENABLED_STATUS: usize = 5;
     pub const FORMAT: usize = 6;

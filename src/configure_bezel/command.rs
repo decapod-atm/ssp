@@ -3,7 +3,7 @@ use crate::{
     BezelConfigStorage, Blue, CommandOps, Green, MessageOps, MessageType, Red, RGB,
 };
 
-pub mod index {
+mod index {
     pub const RED: usize = 4;
     pub const GREEN: usize = 5;
     pub const BLUE: usize = 6;
