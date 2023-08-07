@@ -32,7 +32,7 @@ impl DeviceStatus {
             status: ResponseStatus::Ok,
             unit_type: UnitType::from_inner(0),
             firmware_version: FirmwareVersion::from_inner(0),
-            country_code: CountryCode::from_inner(0),
+            country_code: CountryCode::new(),
             value_multiplier: ValueMultiplier::from_inner(0),
             protocol_version: ProtocolVersion::Reserved,
             dataset_version: String::new(),
@@ -308,13 +308,13 @@ impl AtomicDeviceStatus {
 
     /// Gets the [CountryCode].
     pub fn country_code(&self) -> CountryCode {
-        CountryCode::from_inner(self.country_code.load(Ordering::Relaxed))
+        CountryCode::from(&self.country_code.load(Ordering::Relaxed).to_be_bytes()[1..])
     }
 
     /// Sets the [CountryCode].
     pub fn set_country_code(&self, country_code: CountryCode) {
         self.country_code
-            .store(country_code.as_inner(), Ordering::SeqCst);
+            .store(u32::from(country_code), Ordering::SeqCst);
     }
 
     /// Builder function that sets the [CountryCode].

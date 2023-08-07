@@ -66,7 +66,7 @@ impl PayoutByDenominationCommand {
         self
     }
 
-    /// Gets a list of the [PayoutDenomination]s in the command.
+    /// Gets a list of [PayoutDenomination]s in the command.
     pub fn payout_denominations(&self) -> Result<PayoutDenominationList> {
         let num = self.number_of_payouts() as usize;
         if num > MAX_PAYOUTS {
@@ -89,7 +89,7 @@ impl PayoutByDenominationCommand {
         }
     }
 
-    /// Sets a list of the [PayoutDenomination]s in the command.
+    /// Sets a list of [PayoutDenomination]s in the command.
     pub fn set_payout_denominations(&mut self, list: &PayoutDenominationList) {
         // length is guarenteed valid because of type constraints
         let num = list.len();
@@ -105,6 +105,12 @@ impl PayoutByDenominationCommand {
             // `to_buffer` will not fail because the chunk length is valid
             payout.to_buffer(chunk).ok();
         }
+    }
+
+    /// Builder function that sets a list of [PayoutDenomination]s in the command.
+    pub fn with_payout_denominations(mut self, list: &PayoutDenominationList) -> Self {
+        self.set_payout_denominations(list);
+        self
     }
 
     /// Gets the [PayoutOption].

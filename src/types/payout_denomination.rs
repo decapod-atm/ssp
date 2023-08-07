@@ -79,7 +79,7 @@ impl PayoutDenomination {
         Self {
             number: 0,
             value: 0,
-            currency: CountryCode::from_inner(0),
+            currency: CountryCode::new(),
         }
     }
 
@@ -157,7 +157,7 @@ impl PayoutDenomination {
         } else {
             buf[..2].copy_from_slice(self.number().to_le_bytes().as_ref());
             buf[2..6].copy_from_slice(self.value().to_le_bytes().as_ref());
-            buf[6..PAYOUT_BLOCK].copy_from_slice(format!("{}", self.currency()).as_bytes());
+            buf[6..PAYOUT_BLOCK].copy_from_slice(<&str>::from(self.currency()).as_bytes());
 
             Ok(())
         }
