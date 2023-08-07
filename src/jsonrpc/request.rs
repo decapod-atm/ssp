@@ -21,17 +21,15 @@ impl From<&Request> for Event {
                 EventPayload::Error(err)
             }
             Method::Disable | Method::Stop | Method::Shutdown => EventPayload::DisableEvent(
-                val.params::<DisableEvent>()
-                    .unwrap_or(DisableEvent::new()),
+                val.params::<DisableEvent>().unwrap_or(DisableEvent::new()),
             ),
             Method::Enable | Method::Accept => EventPayload::EnableEvent(
                 val.params::<EnableEvent>()
                     .unwrap_or(EnableEvent::default()),
             ),
-            Method::Reject => EventPayload::RejectEvent(
-                val.params::<RejectEvent>()
-                    .unwrap_or(RejectEvent::new()),
-            ),
+            Method::Reject => {
+                EventPayload::RejectEvent(val.params::<RejectEvent>().unwrap_or(RejectEvent::new()))
+            }
             Method::Stack => EventPayload::StackEvent(
                 val.params::<StackEvent>().unwrap_or(StackEvent::default()),
             ),
@@ -78,12 +76,11 @@ impl From<&Request> for Event {
                 val.params::<RejectingEvent>()
                     .unwrap_or(RejectingEvent::new()),
             ),
-            Method::Reset => EventPayload::ResetEvent(
-                val.params::<ResetEvent>().unwrap_or(ResetEvent::new()),
-            ),
+            Method::Reset => {
+                EventPayload::ResetEvent(val.params::<ResetEvent>().unwrap_or(ResetEvent::new()))
+            }
             Method::Stacked => EventPayload::StackedEvent(
-                val.params::<StackedEvent>()
-                    .unwrap_or(StackedEvent::new()),
+                val.params::<StackedEvent>().unwrap_or(StackedEvent::new()),
             ),
             Method::StackerFull => EventPayload::StackerFullEvent(
                 val.params::<StackerFullEvent>()

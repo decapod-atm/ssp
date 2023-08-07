@@ -1,6 +1,6 @@
 use crate::{std::fmt, DeviceStatus};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Status](crate::ResponseStatus::Status) event.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -49,10 +49,7 @@ impl From<StatusEvent> for &'static str {
 
 impl fmt::Display for StatusEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
-        let method = self.to_str();
-        let status = self.device_status();
-        write!(f, "{o}\"{method}\": {status}{c}")
+        write!(f, r#"{{"{}": {}}}"#, self.to_str(), self.device_status())
     }
 }
 
@@ -67,7 +64,7 @@ mod tests {
     #[test]
     fn test_status_event_serde() -> Result<()> {
         let event = StatusEvent::default();
-        let exp_event_str = "{\"details\":{\"status\":\"Ok\",\"unit_type\":0,\"firmware_version\":0,\"country_code\":0,\"value_multiplier\":0,\"protocol_version\":\"Reserved\",\"cashbox_attached\":false}}";
+        let exp_event_str = r#"{"details":{"status":"Ok","unit_type":0,"firmware_version":0,"country_code":"XXX","value_multiplier":0,"protocol_version":"Reserved","dataset_version":"","cashbox_attached":false}}"#;
 
         assert_eq!(serde_json::to_string(&event)?.as_str(), exp_event_str);
 

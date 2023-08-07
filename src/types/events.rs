@@ -274,9 +274,7 @@ impl From<Method> for Event {
             Method::Reject => EventPayload::RejectEvent(RejectEvent::new()),
             Method::Stack => EventPayload::StackEvent(StackEvent::default()),
             Method::Status => EventPayload::StatusEvent(StatusEvent::default()),
-            Method::CashboxRemoved => {
-                EventPayload::CashboxRemovedEvent(CashboxRemovedEvent::new())
-            }
+            Method::CashboxRemoved => EventPayload::CashboxRemovedEvent(CashboxRemovedEvent::new()),
             Method::CashboxReplaced => {
                 EventPayload::CashboxReplacedEvent(CashboxReplacedEvent::new())
             }
