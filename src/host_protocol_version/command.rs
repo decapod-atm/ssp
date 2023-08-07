@@ -3,7 +3,7 @@ use crate::{
     len::HOST_PROTOCOL_VERSION_COMMAND, CommandOps, MessageOps, MessageType, ProtocolVersion,
 };
 
-pub mod index {
+mod index {
     pub const PROTOCOL_VERSION: usize = 4;
 }
 

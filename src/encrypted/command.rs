@@ -10,7 +10,7 @@ use crate::{
     impl_message_from_buf, len, AesKey, CommandOps, Error, MessageOps, Result, SequenceCount,
 };
 
-use super::{index, WrappedEncryptedMessage};
+use super::{encrypted_index as index, WrappedEncryptedMessage};
 
 /// Encrypted - Command (0x7E)
 ///

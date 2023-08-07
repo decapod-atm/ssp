@@ -3,7 +3,7 @@ use crate::{
     len::LAST_REJECT_CODE_RESPONSE, std::fmt, LastRejectCode, MessageOps, MessageType, ResponseOps,
 };
 
-pub mod index {
+mod index {
     pub const REJECT_CODE: usize = 4;
 }
 

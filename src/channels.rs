@@ -235,7 +235,7 @@ pub fn channel_value_with_lock(
 }
 
 #[cfg(test)]
-pub mod tests {
+mod tests {
     use super::*;
 
     #[test]

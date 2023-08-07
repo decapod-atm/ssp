@@ -3,7 +3,7 @@ use crate::{
     len, BarcodeCurrencyInhibit, CommandOps, MessageOps, MessageType,
 };
 
-pub mod index {
+mod index {
     pub const INHIBIT: usize = 4;
 }
 

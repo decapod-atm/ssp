@@ -2,10 +2,7 @@ use alloc::string::String;
 
 use crate::std::sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering};
 
-use crate::{
-    impl_default, std::fmt, ResponseOps, SetupRequestResponse, UnitDataResponse, CLOSE_BRACE,
-    OPEN_BRACE,
-};
+use crate::{impl_default, std::fmt, ResponseOps, SetupRequestResponse, UnitDataResponse};
 
 use super::{
     CountryCode, FirmwareVersion, ProtocolVersion, ResponseStatus, UnitType, ValueMultiplier,
@@ -32,7 +29,7 @@ impl DeviceStatus {
             status: ResponseStatus::Ok,
             unit_type: UnitType::from_inner(0),
             firmware_version: FirmwareVersion::from_inner(0),
-            country_code: CountryCode::from_inner(0),
+            country_code: CountryCode::new(),
             value_multiplier: ValueMultiplier::from_inner(0),
             protocol_version: ProtocolVersion::Reserved,
             dataset_version: String::new(),
@@ -214,7 +211,6 @@ impl_default!(DeviceStatus);
 
 impl fmt::Display for DeviceStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
         let status = self.response_status();
         let unit_type = self.unit_type();
         let firmware = self.firmware_version();
@@ -224,7 +220,10 @@ impl fmt::Display for DeviceStatus {
         let dataset = self.dataset_version();
         let cashbox = self.cashbox_attached();
 
-        write!(f, "{o}\"response_status\": \"{status}\", \"unit_type\": {unit_type}, \"firmware_version\": \"{firmware}\", \"country_code\": \"{country_code}\", \"value_multiplier\": {vm}, \"protocol_version\": \"{protocol}\", \"dataset_version\": \"{dataset}\", \"cashbox_attached\": {cashbox}{c}")
+        write!(
+            f,
+            r#"{{"response_status": "{status}", "unit_type": {unit_type}, "firmware_version": "{firmware}", "country_code": "{country_code}", "value_multiplier": {vm}, "protocol_version": "{protocol}", "dataset_version": "{dataset}", "cashbox_attached": {cashbox}}}"#
+        )
     }
 }
 
@@ -308,13 +307,13 @@ impl AtomicDeviceStatus {
 
     /// Gets the [CountryCode].
     pub fn country_code(&self) -> CountryCode {
-        CountryCode::from_inner(self.country_code.load(Ordering::Relaxed))
+        CountryCode::from(&self.country_code.load(Ordering::Relaxed).to_be_bytes()[1..])
     }
 
     /// Sets the [CountryCode].
     pub fn set_country_code(&self, country_code: CountryCode) {
         self.country_code
-            .store(country_code.as_inner(), Ordering::SeqCst);
+            .store(u32::from(country_code), Ordering::SeqCst);
     }
 
     /// Builder function that sets the [CountryCode].

@@ -3,7 +3,7 @@ use crate::{
     len, CommandOps, MessageOps, MessageType, ModulusKey,
 };
 
-pub mod index {
+mod index {
     pub const MODULUS: usize = 4;
     pub const MODULUS_END: usize = 12;
 }

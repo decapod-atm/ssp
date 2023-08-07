@@ -21,17 +21,15 @@ impl From<&Request> for Event {
                 EventPayload::Error(err)
             }
             Method::Disable | Method::Stop | Method::Shutdown => EventPayload::DisableEvent(
-                val.params::<DisableEvent>()
-                    .unwrap_or(DisableEvent::default()),
+                val.params::<DisableEvent>().unwrap_or(DisableEvent::new()),
             ),
             Method::Enable | Method::Accept => EventPayload::EnableEvent(
                 val.params::<EnableEvent>()
                     .unwrap_or(EnableEvent::default()),
             ),
-            Method::Reject => EventPayload::RejectEvent(
-                val.params::<RejectEvent>()
-                    .unwrap_or(RejectEvent::default()),
-            ),
+            Method::Reject => {
+                EventPayload::RejectEvent(val.params::<RejectEvent>().unwrap_or(RejectEvent::new()))
+            }
             Method::Stack => EventPayload::StackEvent(
                 val.params::<StackEvent>().unwrap_or(StackEvent::default()),
             ),
@@ -41,15 +39,15 @@ impl From<&Request> for Event {
             ),
             Method::CashboxRemoved => EventPayload::CashboxRemovedEvent(
                 val.params::<CashboxRemovedEvent>()
-                    .unwrap_or(CashboxRemovedEvent::default()),
+                    .unwrap_or(CashboxRemovedEvent::new()),
             ),
             Method::CashboxReplaced => EventPayload::CashboxReplacedEvent(
                 val.params::<CashboxReplacedEvent>()
-                    .unwrap_or(CashboxReplacedEvent::default()),
+                    .unwrap_or(CashboxReplacedEvent::new()),
             ),
             Method::Disabled => EventPayload::DisabledEvent(
                 val.params::<DisabledEvent>()
-                    .unwrap_or(DisabledEvent::default()),
+                    .unwrap_or(DisabledEvent::new()),
             ),
             Method::FraudAttempt => EventPayload::FraudAttemptEvent(
                 val.params::<FraudAttemptEvent>()
@@ -72,30 +70,29 @@ impl From<&Request> for Event {
             }
             Method::Rejected => EventPayload::RejectedEvent(
                 val.params::<RejectedEvent>()
-                    .unwrap_or(RejectedEvent::default()),
+                    .unwrap_or(RejectedEvent::new()),
             ),
             Method::Rejecting => EventPayload::RejectingEvent(
                 val.params::<RejectingEvent>()
-                    .unwrap_or(RejectingEvent::default()),
+                    .unwrap_or(RejectingEvent::new()),
             ),
-            Method::Reset => EventPayload::ResetEvent(
-                val.params::<ResetEvent>().unwrap_or(ResetEvent::default()),
-            ),
+            Method::Reset => {
+                EventPayload::ResetEvent(val.params::<ResetEvent>().unwrap_or(ResetEvent::new()))
+            }
             Method::Stacked => EventPayload::StackedEvent(
-                val.params::<StackedEvent>()
-                    .unwrap_or(StackedEvent::default()),
+                val.params::<StackedEvent>().unwrap_or(StackedEvent::new()),
             ),
             Method::StackerFull => EventPayload::StackerFullEvent(
                 val.params::<StackerFullEvent>()
-                    .unwrap_or(StackerFullEvent::default()),
+                    .unwrap_or(StackerFullEvent::new()),
             ),
             Method::Stacking => EventPayload::StackingEvent(
                 val.params::<StackingEvent>()
-                    .unwrap_or(StackingEvent::default()),
+                    .unwrap_or(StackingEvent::new()),
             ),
             Method::UnsafeJam => EventPayload::UnsafeJamEvent(
                 val.params::<UnsafeJamEvent>()
-                    .unwrap_or(UnsafeJamEvent::default()),
+                    .unwrap_or(UnsafeJamEvent::new()),
             ),
             Method::Reserved(m) => {
                 EventPayload::Error(Error::JsonRpc(format!("reserved method: {m}")))

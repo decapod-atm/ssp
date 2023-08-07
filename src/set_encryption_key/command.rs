@@ -3,7 +3,7 @@ use crate::{
     len, CommandOps, FixedKey, MessageOps, MessageType,
 };
 
-pub mod index {
+mod index {
     pub const FIXED_KEY: usize = 4;
     pub const FIXED_KEY_END: usize = 12;
 }

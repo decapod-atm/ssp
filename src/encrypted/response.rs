@@ -10,7 +10,7 @@ use crate::{
     impl_response_ops, len, AesKey, Error, MessageOps, ResponseOps, Result, SequenceCount,
 };
 
-use super::{index, WrappedEncryptedMessage};
+use super::{encrypted_index as index, WrappedEncryptedMessage};
 
 /// Encrypted - Response (0x7E)
 ///

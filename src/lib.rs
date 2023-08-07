@@ -22,11 +22,13 @@ extern crate bitfield;
 #[cfg(not(feature = "std"))]
 use core as std;
 #[cfg(feature = "std")]
+#[allow(clippy::single_component_path_imports)]
 use std;
 
 mod macros;
 
 pub mod aes;
+pub mod arrays;
 pub mod channel_value_data;
 mod channels;
 pub mod configure_bezel;
@@ -52,6 +54,7 @@ pub mod keys;
 pub mod last_reject_code;
 pub mod len;
 pub mod message;
+pub mod payout_by_denomination;
 pub mod poll;
 pub mod poll_with_ack;
 pub mod primes;
@@ -92,7 +95,8 @@ pub use hold::*;
 pub use host_protocol_version::*;
 pub use keys::*;
 pub use last_reject_code::*;
-pub use message::*;
+pub use message::{index as message_index, *};
+pub use payout_by_denomination::*;
 pub use poll::*;
 pub use poll_with_ack::*;
 pub use reject::*;

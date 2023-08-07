@@ -3,7 +3,7 @@ use crate::{
     len, CommandOps, GeneratorKey, MessageOps, MessageType,
 };
 
-pub mod index {
+mod index {
     pub const GENERATOR: usize = 4;
     pub const GENERATOR_END: usize = 12;
 }

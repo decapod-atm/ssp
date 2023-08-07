@@ -95,6 +95,11 @@ jobs:
           GITHUB_ACTIONS_OS: ${{matrix.os}}
           RUST_TARGET: ${{matrix.target.rust}}
         run: cargo test --all
+      - name: Run all the JSON-RPC tests (debug)
+        env:
+          GITHUB_ACTIONS_OS: ${{matrix.os}}
+          RUST_TARGET: ${{matrix.target.rust}}
+        run: cargo test --all --features jsonrpc-std
       - name: Run all the tests (release)
         env:
           GITHUB_ACTIONS_OS: ${{matrix.os}}

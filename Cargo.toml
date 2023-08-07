@@ -23,6 +23,7 @@ rand_chacha = "0.3"
 serialport = { version = "4.2", default-features = false, optional = true }
 sha2 = "0.10"
 zeroize = { version = "1.6", features = ["zeroize_derive"] }
+currency-iso4217 = { version = "0.1", features = ["serde"] }
 
 [dependencies.serde]
 version = "1.0"
@@ -44,3 +45,4 @@ default = ["nv200"]
 std = ["log/std", "rand/std", "rand/std_rng", "serde/std", "serde_json/std", "serialport", "smol-jsonrpc/std"]
 nv200 = []
 jsonrpc = ["serde_json", "smol-jsonrpc"]
+jsonrpc-std = ["jsonrpc", "std"]

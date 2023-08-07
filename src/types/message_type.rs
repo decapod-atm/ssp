@@ -80,6 +80,8 @@ pub enum MessageType {
     ManufacturerExtension = 0x30,
     /// Causes the SMART Payout to empty all its stored notes to the cashbox.
     Empty = 0x3f,
+    /// Payout notes to the customer by denomination.
+    PayoutByDenomination = 0x46,
     /// Sets the eSSP generator prime (64-bits).
     SetGenerator = 0x4a,
     /// Sets the eSSP modulus (64-bits).
@@ -142,6 +144,7 @@ impl From<u8> for MessageType {
             0x27 => Self::GetBarcodeData,
             0x30 => Self::ManufacturerExtension,
             0x3f => Self::Empty,
+            0x46 => Self::PayoutByDenomination,
             0x4a => Self::SetGenerator,
             0x4b => Self::SetModulus,
             0x4c => Self::RequestKeyExchange,
@@ -198,6 +201,7 @@ impl From<MessageType> for &'static str {
             MessageType::GetBarcodeData => "GetBarcodeData",
             MessageType::ManufacturerExtension => "ManufacturerExtension",
             MessageType::Empty => "Empty",
+            MessageType::PayoutByDenomination => "PayoutByDenomination",
             MessageType::SetGenerator => "SetGenerator",
             MessageType::SetModulus => "SetModulus",
             MessageType::RequestKeyExchange => "RequestKeyExchange",
@@ -221,7 +225,7 @@ impl From<&MessageType> for &'static str {
 
 impl fmt::Display for MessageType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", <&'static str>::from(self))
+        write!(f, "{}", <&str>::from(self))
     }
 }
 

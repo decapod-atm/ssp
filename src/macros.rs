@@ -589,10 +589,11 @@ macro_rules! impl_encrypted_message_ops {
     ($name:ident) => {
         impl $crate::MessageOps for $name {
             fn init(&mut self) {
-                self.buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
+                use $crate::encrypted::encrypted_index as index;
+                self.buf[index::STEX] = $crate::encrypted::STEX;
 
-                let count_start = $crate::encrypted::index::COUNT;
-                let count_end = $crate::encrypted::index::COUNT_END;
+                let count_start = index::COUNT;
+                let count_end = index::COUNT_END;
                 let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
 
                 self.buf[count_start..count_end].copy_from_slice(count.as_ref());
@@ -609,7 +610,7 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn message_type(&self) -> $crate::MessageType {
-                self.buf[$crate::encrypted::index::COMMAND].into()
+                self.buf[$crate::encrypted::encrypted_index::COMMAND].into()
             }
 
             fn is_command(&self) -> bool {
@@ -630,11 +631,11 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn data_len(&self) -> usize {
-                self.buf[$crate::encrypted::index::LEN] as usize
+                self.buf[$crate::encrypted::encrypted_index::LEN] as usize
             }
 
             fn set_data_len(&mut self, len: u8) {
-                self.buf[$crate::encrypted::index::LEN] = len;
+                self.buf[$crate::encrypted::encrypted_index::LEN] = len;
             }
 
             fn metadata_len(&self) -> usize {
@@ -642,7 +643,7 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn calculate_checksum(&mut self) -> u16 {
-                use $crate::encrypted::index;
+                use $crate::encrypted::encrypted_index as index;
 
                 let len = self.len();
 
@@ -655,7 +656,7 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn verify_checksum(&self) -> Result<()> {
-                use $crate::encrypted::index;
+                use $crate::encrypted::encrypted_index as index;
 
                 let buf = self.buf();
                 let len = self.len();
@@ -675,10 +676,12 @@ macro_rules! impl_encrypted_message_ops {
     ($name:ident, $msg_type:ident::$variant:tt) => {
         impl MessageOps for $name {
             fn init(&mut self) {
-                self.buf[$crate::encrypted::index::STEX] = $crate::encrypted::STEX;
+                use $crate::encrypted::encrypted_index as index;
 
-                let count_start = $crate::encrypted::index::COUNT;
-                let count_end = $crate::encrypted::index::COUNT_END;
+                self.buf[index::STEX] = $crate::encrypted::STEX;
+
+                let count_start = index::COUNT;
+                let count_end = index::COUNT_END;
                 let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
 
                 self.buf[count_start..count_end].copy_from_slice(count.as_ref());
@@ -728,7 +731,7 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn calculate_checksum(&mut self) -> u16 {
-                use $crate::encrypted::index;
+                use $crate::encrypted::encrypted_index as index;
 
                 let len = self.len();
                 let buf = self.buf_mut();
@@ -741,7 +744,7 @@ macro_rules! impl_encrypted_message_ops {
             }
 
             fn verify_checksum(&self) -> Result<()> {
-                use $crate::encrypted::index;
+                use $crate::encrypted::encrypted_index as index;
 
                 let buf = self.buf();
                 let len = self.len();
@@ -1017,6 +1020,124 @@ macro_rules! make_list {
 
                     if i < self.len() - 1 {
                         write!(f, ", ")?;
+                    }
+                }
+
+                write!(f, "]")
+            }
+        }
+
+        impl Default for $list_name {
+            fn default() -> Self {
+                Self::new()
+            }
+        }
+    };
+
+    // sized variant of the macro
+    ($list_name:ident, $name:ident, $size:tt, $doc:tt) => {
+        #[doc = $doc]
+        #[derive(Clone, Debug, PartialEq)]
+        pub struct $list_name(::heapless::Vec<$name, $size>);
+
+        impl $list_name {
+            /// Creates a new empty list.
+            pub fn new() -> Self {
+                Self(::heapless::Vec::new())
+            }
+
+            /// Gets an iterator over the list.
+            pub fn iter(&self) -> $crate::std::slice::Iter<$name> {
+                self.0.iter()
+            }
+
+            /// Gets a mutable iterator over the list.
+            pub fn iter_mut(&mut self) -> $crate::std::slice::IterMut<$name> {
+                self.0.iter_mut()
+            }
+
+            /// Gets the list length.
+            pub fn len(&self) -> usize {
+                self.0.len()
+            }
+
+            /// Gets the list capacity.
+            pub fn capacity(&self) -> usize {
+                self.0.capacity()
+            }
+
+            /// Gets whether the list is empty.
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
+            }
+
+            /// Get the list as a reference to its inner container type.
+            pub fn as_inner(&self) -> &::heapless::Vec<$name, $size> {
+                &self.0
+            }
+
+            /// Get the list as a mutable reference to its inner container type.
+            pub fn as_inner_mut(&mut self) -> &mut ::heapless::Vec<$name, $size> {
+                &mut self.0
+            }
+
+            /// Converts the list into its inner container type.
+            pub fn into_inner(self) -> ::heapless::Vec<$name, $size> {
+                self.0
+            }
+        }
+
+        impl AsRef<[$name]> for $list_name {
+            fn as_ref(&self) -> &[$name] {
+                self.0.as_slice()
+            }
+        }
+
+        impl AsMut<[$name]> for $list_name {
+            fn as_mut(&mut self) -> &mut [$name] {
+                self.0.as_mut()
+            }
+        }
+
+        impl From<::heapless::Vec<$name, $size>> for $list_name {
+            fn from(val: ::heapless::Vec<$name, $size>) -> Self {
+                Self(val)
+            }
+        }
+
+        impl From<&[$name]> for $list_name {
+            fn from(val: &[$name]) -> Self {
+                let len = $crate::std::cmp::min(val.len(), $size);
+                let mut list = ::heapless::Vec::<$name, $size>::new();
+
+                // the above call to `min` ensures the length is in the valid range
+                list.extend_from_slice(&val[..len]).ok();
+
+                Self(list)
+            }
+        }
+
+        impl<const N: usize> From<[$name; N]> for $list_name {
+            fn from(val: [$name; N]) -> Self {
+                val.as_ref().into()
+            }
+        }
+
+        impl<const N: usize> From<&[$name; N]> for $list_name {
+            fn from(val: &[$name; N]) -> Self {
+                val.as_ref().into()
+            }
+        }
+
+        impl $crate::std::fmt::Display for $list_name {
+            fn fmt(&self, f: &mut $crate::std::fmt::Formatter<'_>) -> $crate::std::fmt::Result {
+                write!(f, "[")?;
+
+                for (i, code) in self.iter().enumerate() {
+                    write!(f, "{code}")?;
+
+                    if i < self.len() - 1 {
+                        write!(f, ",")?;
                     }
                 }
 

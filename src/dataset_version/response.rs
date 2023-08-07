@@ -4,7 +4,7 @@ use crate::{
     Error, MessageOps, MessageType, ResponseOps, Result,
 };
 
-pub mod index {
+mod index {
     pub const DATASET_VERSION: usize = 4;
 }
 

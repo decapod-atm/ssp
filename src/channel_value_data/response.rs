@@ -3,7 +3,7 @@ use crate::{
     ChannelValue, ChannelValueList, Error, MessageOps, MessageType, ResponseOps, Result, Vec,
 };
 
-pub mod index {
+mod index {
     pub const NUM_CHANNELS: usize = 4;
     pub const CHANNEL_VALUES: usize = NUM_CHANNELS + 1;
 }

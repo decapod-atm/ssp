@@ -4,7 +4,7 @@ use crate::{
     MessageOps, MessageType,
 };
 
-pub mod index {
+mod index {
     pub const ENABLED_STATUS: usize = 4;
     pub const FORMAT: usize = 5;
     pub const CHARACTERS: usize = 6;
