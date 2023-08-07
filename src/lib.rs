@@ -22,6 +22,7 @@ extern crate bitfield;
 #[cfg(not(feature = "std"))]
 use core as std;
 #[cfg(feature = "std")]
+#[allow(clippy::single_component_path_imports)]
 use std;
 
 mod macros;

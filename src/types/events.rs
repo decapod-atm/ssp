@@ -268,19 +268,19 @@ impl From<Method> for Event {
         let payload = match method {
             Method::Fail => EventPayload::Error(Error::Generic(-1)),
             Method::Disable | Method::Stop | Method::Shutdown => {
-                EventPayload::DisableEvent(DisableEvent::default())
+                EventPayload::DisableEvent(DisableEvent::new())
             }
             Method::Enable | Method::Accept => EventPayload::EnableEvent(EnableEvent::default()),
-            Method::Reject => EventPayload::RejectEvent(RejectEvent::default()),
+            Method::Reject => EventPayload::RejectEvent(RejectEvent::new()),
             Method::Stack => EventPayload::StackEvent(StackEvent::default()),
             Method::Status => EventPayload::StatusEvent(StatusEvent::default()),
             Method::CashboxRemoved => {
-                EventPayload::CashboxRemovedEvent(CashboxRemovedEvent::default())
+                EventPayload::CashboxRemovedEvent(CashboxRemovedEvent::new())
             }
             Method::CashboxReplaced => {
-                EventPayload::CashboxReplacedEvent(CashboxReplacedEvent::default())
+                EventPayload::CashboxReplacedEvent(CashboxReplacedEvent::new())
             }
-            Method::Disabled => EventPayload::DisabledEvent(DisabledEvent::default()),
+            Method::Disabled => EventPayload::DisabledEvent(DisabledEvent::new()),
             Method::FraudAttempt => EventPayload::FraudAttemptEvent(FraudAttemptEvent::default()),
             Method::NoteClearedFromFront => {
                 EventPayload::NoteClearedFromFrontEvent(NoteClearedFromFrontEvent::default())
@@ -290,13 +290,13 @@ impl From<Method> for Event {
             }
             Method::NoteCredit => EventPayload::NoteCreditEvent(NoteCreditEvent::default()),
             Method::Read => EventPayload::ReadEvent(ReadEvent::default()),
-            Method::Rejected => EventPayload::RejectedEvent(RejectedEvent::default()),
-            Method::Rejecting => EventPayload::RejectingEvent(RejectingEvent::default()),
-            Method::Reset => EventPayload::ResetEvent(ResetEvent::default()),
-            Method::Stacked => EventPayload::StackedEvent(StackedEvent::default()),
-            Method::StackerFull => EventPayload::StackerFullEvent(StackerFullEvent::default()),
-            Method::Stacking => EventPayload::StackingEvent(StackingEvent::default()),
-            Method::UnsafeJam => EventPayload::UnsafeJamEvent(UnsafeJamEvent::default()),
+            Method::Rejected => EventPayload::RejectedEvent(RejectedEvent::new()),
+            Method::Rejecting => EventPayload::RejectingEvent(RejectingEvent::new()),
+            Method::Reset => EventPayload::ResetEvent(ResetEvent::new()),
+            Method::Stacked => EventPayload::StackedEvent(StackedEvent::new()),
+            Method::StackerFull => EventPayload::StackerFullEvent(StackerFullEvent::new()),
+            Method::Stacking => EventPayload::StackingEvent(StackingEvent::new()),
+            Method::UnsafeJam => EventPayload::UnsafeJamEvent(UnsafeJamEvent::new()),
             Method::Reserved(m) => EventPayload::Error(Error::Generic(-(m as i64))),
         };
 
