@@ -203,6 +203,7 @@ impl EncryptedCommand {
         }
 
         super::increment_sequence_count();
+        log::trace!("encryption sequence count: {}", super::sequence_count());
 
         if let Err(err) = enc_msg.stuff_encrypted_data() {
             log::error!("error stuffing encrypted command message: {err}");

@@ -234,6 +234,7 @@ impl EncryptedResponse {
         }
 
         super::increment_sequence_count();
+        log::trace!("decryption sequence count: {}", super::sequence_count());
 
         dec_msg
     }

@@ -1,6 +1,6 @@
 //! Event types for polling responses.
 
-use crate::{std::fmt, Error};
+use crate::{inner_enum, std::fmt, Error};
 
 mod cashbox_removed;
 mod cashbox_replaced;
@@ -166,6 +166,41 @@ impl fmt::Display for EventPayload {
     }
 }
 
+inner_enum!(EventPayload, Error, as_error);
+inner_enum!(EventPayload, DisableEvent, as_disable_event);
+inner_enum!(EventPayload, DispenseEvent, as_dispense_event);
+inner_enum!(EventPayload, EnableEvent, as_enable_event);
+inner_enum!(EventPayload, RejectEvent, as_reject_event);
+inner_enum!(EventPayload, StackEvent, as_stack_event);
+inner_enum!(EventPayload, StatusEvent, as_status_event);
+inner_enum!(EventPayload, CashboxRemovedEvent, as_cashbox_removed_event);
+inner_enum!(
+    EventPayload,
+    CashboxReplacedEvent,
+    as_cashbox_replaced_event
+);
+inner_enum!(EventPayload, DisabledEvent, as_disabled_event);
+inner_enum!(EventPayload, FraudAttemptEvent, as_fraud_attempt_event);
+inner_enum!(
+    EventPayload,
+    NoteClearedFromFrontEvent,
+    as_note_cleared_from_front_event
+);
+inner_enum!(
+    EventPayload,
+    NoteClearedIntoCashboxEvent,
+    as_note_cleared_into_cashbox_event
+);
+inner_enum!(EventPayload, NoteCreditEvent, as_note_credit_event);
+inner_enum!(EventPayload, ReadEvent, as_read_event);
+inner_enum!(EventPayload, RejectedEvent, as_rejected_event);
+inner_enum!(EventPayload, RejectingEvent, as_rejecting_event);
+inner_enum!(EventPayload, ResetEvent, as_reset_event);
+inner_enum!(EventPayload, StackedEvent, as_stacked_event);
+inner_enum!(EventPayload, StackerFullEvent, as_stacker_full_event);
+inner_enum!(EventPayload, StackingEvent, as_stacking_event);
+inner_enum!(EventPayload, UnsafeJamEvent, as_unsafe_jam_event);
+
 macro_rules! from_event_for_payload {
     ($event:ident) => {
         impl From<$event> for EventPayload {
@@ -210,6 +245,7 @@ from_event_for_payload!(EnableEvent);
 from_event_for_payload!(RejectEvent);
 from_event_for_payload!(StackEvent);
 from_event_for_payload!(StatusEvent);
+from_event_for_payload!(DispenseEvent);
 // Response events
 from_event_for_payload!(CashboxRemovedEvent);
 from_event_for_payload!(CashboxReplacedEvent);
@@ -353,6 +389,7 @@ from_event_for_event!(EnableEvent);
 from_event_for_event!(RejectEvent);
 from_event_for_event!(StackEvent);
 from_event_for_event!(StatusEvent);
+from_event_for_event!(DispenseEvent);
 // Response events
 from_event_for_event!(CashboxRemovedEvent);
 from_event_for_event!(CashboxReplacedEvent);

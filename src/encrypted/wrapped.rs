@@ -25,6 +25,11 @@ impl WrappedEncryptedMessage {
         msg
     }
 
+    pub fn is_encrypted(&self) -> bool {
+        use crate::message::STEX;
+        self.data()[0] == STEX
+    }
+
     /// Gets the wrapped encrypted data.
     pub fn encrypted_data(&self) -> &[u8] {
         use crate::message::index;

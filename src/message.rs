@@ -236,8 +236,6 @@ pub trait MessageOps {
             }
         }
 
-        log::trace!("message type: {msg_type}, buffer: {buf:x?}");
-
         buf_len = std::cmp::min(buf_len, buf_data_len + METADATA);
         let buf_crc = u16::from_le_bytes(buf[buf_len - 2..].try_into().unwrap());
         let exp_crc = crc16(buf[index::SEQ_ID..buf_len - 2].as_ref());
