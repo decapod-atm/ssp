@@ -37,6 +37,10 @@ impl From<&Request> for Event {
                 val.params::<StatusEvent>()
                     .unwrap_or(StatusEvent::default()),
             ),
+            Method::Dispense => EventPayload::DispenseEvent(
+                val.params::<DispenseEvent>()
+                    .unwrap_or(DispenseEvent::new()),
+            ),
             Method::CashboxRemoved => EventPayload::CashboxRemovedEvent(
                 val.params::<CashboxRemovedEvent>()
                     .unwrap_or(CashboxRemovedEvent::new()),

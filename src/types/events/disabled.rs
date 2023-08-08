@@ -1,6 +1,6 @@
 use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Disabled](crate::ResponseStatus::Disabled) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -15,6 +15,11 @@ impl DisabledEvent {
     /// Gets the [Method] for the [DisabledEvent].
     pub const fn method() -> Method {
         Method::Disabled
+    }
+
+    /// Converts the [DisabledEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -56,11 +61,7 @@ impl<const N: usize> TryFrom<&[u8; N]> for DisabledEvent {
 
 impl fmt::Display for DisabledEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
-            Self::method().to_str()
-        )
+        write!(f, r#"{{"{}"}}"#, self.to_str())
     }
 }
 

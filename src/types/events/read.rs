@@ -1,6 +1,6 @@
 use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Read](crate::ResponseStatus::Read) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -86,14 +86,24 @@ impl From<&ChannelValue> for ReadEvent {
     }
 }
 
+impl From<&ReadEvent> for &'static str {
+    fn from(val: &ReadEvent) -> Self {
+        val.to_str()
+    }
+}
+
+impl From<ReadEvent> for &'static str {
+    fn from(val: ReadEvent) -> Self {
+        (&val).into()
+    }
+}
+
 impl fmt::Display for ReadEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
-
         let method = self.to_str();
         let value = self.value();
 
-        write!(f, "{o}\"{method}\": {o}\"value\": {value}{c}{c}",)
+        write!(f, r#"{{"{method}": {{"value": {value}}}}}"#)
     }
 }
 

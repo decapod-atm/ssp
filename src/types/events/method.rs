@@ -25,6 +25,8 @@ pub enum Method {
     Status,
     /// Shutdown the server.
     Shutdown,
+    /// Dispense notes from the device.
+    Dispense,
     /// Cashbox removed from device.
     CashboxRemoved = ResponseStatus::CashboxRemoved.to_u8(),
     /// Cashbox replaced into device.
@@ -78,6 +80,7 @@ impl Method {
             Self::Reject => "reject",
             Self::Stack => "stack",
             Self::Shutdown => "shutdown",
+            Self::Dispense => "dispense",
             Self::CashboxRemoved => "cashbox_removed",
             Self::CashboxReplaced => "cashbox_replaced",
             Self::Disabled => "disabled",
@@ -171,6 +174,7 @@ impl FromStr for Method {
             "reject" => Self::Reject,
             "stack" => Self::Stack,
             "shutdown" => Self::Shutdown,
+            "dispense" => Self::Dispense,
             "cashbox_removed" => Self::CashboxRemoved,
             "cashbox_replaced" => Self::CashboxReplaced,
             "disabled" => Self::Disabled,
@@ -280,6 +284,7 @@ impl serde::Serialize for Method {
             Self::Stack => serializer.serialize_unit_variant("Method", 5, "stack"),
             Self::Status => serializer.serialize_unit_variant("Method", 6, "status"),
             Self::Shutdown => serializer.serialize_unit_variant("Method", 7, "shutdown"),
+            Self::Dispense => serializer.serialize_unit_variant("Method", 7, "dispense"),
             Self::CashboxRemoved => {
                 serializer.serialize_unit_variant("Method", 8, "cashbox_removed")
             }

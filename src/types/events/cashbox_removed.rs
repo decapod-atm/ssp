@@ -1,6 +1,6 @@
 use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [CashboxRemoved](crate::ResponseStatus::CashboxRemoved) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -15,6 +15,11 @@ impl CashboxRemovedEvent {
     /// Gets the [Method] for the [CashboxRemovedEvent].
     pub const fn method() -> Method {
         Method::CashboxRemoved
+    }
+
+    /// Converts the [CashboxRemovedEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -54,13 +59,21 @@ impl<const N: usize> TryFrom<&[u8; N]> for CashboxRemovedEvent {
     }
 }
 
+impl From<&CashboxRemovedEvent> for &'static str {
+    fn from(val: &CashboxRemovedEvent) -> Self {
+        val.to_str()
+    }
+}
+
+impl From<CashboxRemovedEvent> for &'static str {
+    fn from(val: CashboxRemovedEvent) -> Self {
+        (&val).into()
+    }
+}
+
 impl fmt::Display for CashboxRemovedEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
-            Self::method().to_str()
-        )
+        write!(f, r#"{{"{}"}}"#, self.to_str())
     }
 }
 

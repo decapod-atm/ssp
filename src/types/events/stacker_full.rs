@@ -1,6 +1,6 @@
 use crate::{impl_default, std::fmt, Error, ResponseStatus, Result};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [StackerFull](crate::ResponseStatus::StackerFull) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -15,6 +15,11 @@ impl StackerFullEvent {
     /// Gets the [Method] for the [StackerFullEvent].
     pub const fn method() -> Method {
         Method::StackerFull
+    }
+
+    /// Converts the [StackerFullEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the length of the event in a [PollResponse](crate::PollResponse).
@@ -54,13 +59,21 @@ impl<const N: usize> TryFrom<&[u8; N]> for StackerFullEvent {
     }
 }
 
+impl From<&StackerFullEvent> for &'static str {
+    fn from(val: &StackerFullEvent) -> Self {
+        val.to_str()
+    }
+}
+
+impl From<StackerFullEvent> for &'static str {
+    fn from(val: StackerFullEvent) -> Self {
+        (&val).into()
+    }
+}
+
 impl fmt::Display for StackerFullEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
-            Self::method().to_str()
-        )
+        write!(f, r#"{{"{}"}}"#, self.to_str())
     }
 }
 

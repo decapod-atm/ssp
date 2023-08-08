@@ -1,6 +1,6 @@
 use crate::{channel_value, std::fmt, ChannelValue, Error, ResponseStatus, Result};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [FraudAttempt](crate::ResponseStatus::FraudAttempt) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -17,6 +17,11 @@ impl FraudAttemptEvent {
     /// Gets the [Method] for the [FraudAttemptEvent].
     pub const fn method() -> Method {
         Method::FraudAttempt
+    }
+
+    /// Converts the [FraudAttemptEvent] to a string.
+    pub const fn to_str(&self) -> &'static str {
+        Self::method().to_str()
     }
 
     /// Gets the [ChannelValue].
@@ -77,13 +82,21 @@ impl From<&ChannelValue> for FraudAttemptEvent {
     }
 }
 
+impl From<&FraudAttemptEvent> for &'static str {
+    fn from(val: &FraudAttemptEvent) -> Self {
+        val.to_str()
+    }
+}
+
+impl From<FraudAttemptEvent> for &'static str {
+    fn from(val: FraudAttemptEvent) -> Self {
+        (&val).into()
+    }
+}
+
 impl fmt::Display for FraudAttemptEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}",
-            Self::method().to_str()
-        )
+        write!(f, r#"{{"{}"}}"#, self.to_str())
     }
 }
 

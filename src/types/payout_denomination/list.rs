@@ -21,7 +21,7 @@ pub struct PayoutDenominationList {
 
 impl PayoutDenominationList {
     /// Creates a new empty list.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             denominations: PayoutVec::new(),
         }
