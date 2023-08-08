@@ -6,6 +6,7 @@ mod cashbox_removed;
 mod cashbox_replaced;
 mod disable;
 mod disabled;
+mod dispense;
 mod enable;
 mod fraud_attempt;
 mod method;
@@ -28,6 +29,7 @@ pub use cashbox_removed::*;
 pub use cashbox_replaced::*;
 pub use disable::*;
 pub use disabled::*;
+pub use dispense::*;
 pub use enable::*;
 pub use fraud_attempt::*;
 pub use method::*;
@@ -55,6 +57,7 @@ pub enum EventPayload {
     Error(Error),
     // Command event payloads
     DisableEvent(DisableEvent),
+    DispenseEvent(DispenseEvent),
     EnableEvent(EnableEvent),
     RejectEvent(RejectEvent),
     StackEvent(StackEvent),
@@ -83,6 +86,7 @@ impl EventPayload {
         match self {
             Self::Error(_) => Method::Fail,
             Self::DisableEvent(_) => DisableEvent::method(),
+            Self::DispenseEvent(_) => DispenseEvent::method(),
             Self::EnableEvent(_) => EnableEvent::method(),
             Self::RejectEvent(_) => RejectEvent::method(),
             Self::StackEvent(_) => StackEvent::method(),
@@ -112,6 +116,7 @@ impl EventPayload {
         match self {
             Self::Error(evt) => json!(evt),
             Self::DisableEvent(evt) => json!(evt),
+            Self::DispenseEvent(evt) => json!(evt),
             Self::EnableEvent(evt) => json!(evt),
             Self::RejectEvent(evt) => json!(evt),
             Self::StackEvent(evt) => json!(evt),
@@ -140,6 +145,7 @@ impl fmt::Display for EventPayload {
         match self {
             Self::Error(err) => write!(f, r#"{{"error": "{err}"}}"#),
             Self::DisableEvent(evt) => write!(f, "{evt}"),
+            Self::DispenseEvent(evt) => write!(f, "{evt}"),
             Self::EnableEvent(evt) => write!(f, "{evt}"),
             Self::RejectEvent(evt) => write!(f, "{evt}"),
             Self::StackEvent(evt) => write!(f, "{evt}"),
@@ -270,6 +276,7 @@ impl From<Method> for Event {
             Method::Disable | Method::Stop | Method::Shutdown => {
                 EventPayload::DisableEvent(DisableEvent::new())
             }
+            Method::Dispense => EventPayload::DispenseEvent(DispenseEvent::default()),
             Method::Enable | Method::Accept => EventPayload::EnableEvent(EnableEvent::default()),
             Method::Reject => EventPayload::RejectEvent(RejectEvent::new()),
             Method::Stack => EventPayload::StackEvent(StackEvent::default()),
