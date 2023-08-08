@@ -1,6 +1,6 @@
 use crate::{std::fmt, ProtocolVersion};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Enable](crate::ResponseEnable::Enable) event.
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -66,11 +66,9 @@ impl From<&ProtocolVersion> for EnableEvent {
 
 impl fmt::Display for EnableEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
-
         let method = self.to_str();
         let protocol = self.protocol_version();
 
-        write!(f, "{o}\"{method}\": {o}\"protocol_version\": {protocol}{c}")
+        write!(f, r#"{{"{method}": {{"protocol_version": {protocol}}}"#)
     }
 }

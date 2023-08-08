@@ -1,6 +1,6 @@
 use crate::{impl_default, std::fmt};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Reject](crate::Method::Reject) event.
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -42,7 +42,7 @@ impl From<RejectEvent> for &'static str {
 
 impl fmt::Display for RejectEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{OPEN_BRACE}\"{}\"{CLOSE_BRACE}", self.to_str())
+        write!(f, r#"{{"{}"}}"#, self.to_str())
     }
 }
 

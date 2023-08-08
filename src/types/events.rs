@@ -48,9 +48,6 @@ pub use stacking::*;
 pub use status::*;
 pub use unsafe_jam::*;
 
-pub const OPEN_BRACE: &str = "{";
-pub const CLOSE_BRACE: &str = "}";
-
 /// JSON-RPC payloads for request parameters and response results.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum EventPayload {

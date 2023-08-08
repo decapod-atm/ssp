@@ -1,6 +1,6 @@
 use crate::{std::fmt, ChannelValue};
 
-use super::{Method, CLOSE_BRACE, OPEN_BRACE};
+use super::Method;
 
 /// Represents a [Stack](crate::Method::Stack) event.
 #[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -61,11 +61,9 @@ impl From<&ChannelValue> for StackEvent {
 
 impl fmt::Display for StackEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (o, c) = (OPEN_BRACE, CLOSE_BRACE);
-
         let method = self.to_str();
         let value = self.value();
 
-        write!(f, "{o}\"{method}\": {o}\"value\": {value}{c}{c}")
+        write!(f, r#"{{"{method}": {{"value": {value}}}}}"#)
     }
 }
