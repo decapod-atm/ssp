@@ -1,4 +1,4 @@
-use crate::tuple_struct;
+use crate::{std::fmt, tuple_struct};
 
 tuple_struct!(
     SequenceCount,
@@ -36,5 +36,11 @@ impl<const N: usize> From<[u8; N]> for SequenceCount {
 impl<const N: usize> From<&[u8; N]> for SequenceCount {
     fn from(val: &[u8; N]) -> Self {
         val.as_ref().into()
+    }
+}
+
+impl fmt::Display for SequenceCount {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_inner())
     }
 }

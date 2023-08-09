@@ -1152,3 +1152,52 @@ macro_rules! make_list {
         }
     };
 }
+
+/// Matches a new-type enum's inner type, and returns a reference to the matched variant.
+///
+/// `fn` parameter should be the function name of the accessor, e.g. for `TypeName` => `as_type_name`
+#[macro_export]
+macro_rules! inner_enum {
+    // macro for when the variant and its wrapped type have the same name
+    ($enum:tt, $inner:tt, $fn:ident) => {
+        impl $enum {
+            pub fn $fn(&self) -> $crate::Result<&$inner> {
+                match self {
+                    $enum::$inner(evt) => Ok(evt),
+                    _ => {
+                        #[cfg(not(feature = "std"))]
+                        use core::any;
+                        #[cfg(feature = "std")]
+                        use std::any;
+
+                        let name = any::type_name::<$inner>();
+                        Err($crate::Error::Enum(format!(
+                            "invalid enum variant, expected: {name}, have: {self}"
+                        )))
+                    }
+                }
+            }
+        }
+    };
+    // macro for when the variant and its wrapped type have different names
+    ($enum:tt, $inner:tt, $inner_ty:tt, $fn:ident) => {
+        impl $enum {
+            pub fn $fn(&self) -> $crate::Result<&$inner_ty> {
+                match self {
+                    $enum::$inner(ty) => Ok(ty),
+                    _ => {
+                        #[cfg(not(feature = "std"))]
+                        use core::any;
+                        #[cfg(feature = "std")]
+                        use std::any;
+
+                        let name = any::type_name::<$inner_ty>();
+                        Err($crate::Error::Enum(format!(
+                            "invalid enum variant, expected: {name}, have: {self}"
+                        )))
+                    }
+                }
+            }
+        }
+    };
+}

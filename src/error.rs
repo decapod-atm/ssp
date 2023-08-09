@@ -36,6 +36,8 @@ pub enum Error {
     Timeout(String),
     #[cfg(feature = "jsonrpc")]
     JsonRpc(String),
+    Event(String),
+    Enum(String),
 }
 
 impl fmt::Display for Error {
@@ -93,6 +95,8 @@ impl fmt::Display for Error {
             Error::Utf8(err) => write!(f, "UTF8 error occurred: {err}"),
             #[cfg(feature = "jsonrpc")]
             Error::JsonRpc(err) => write!(f, "Failed processing JSON-RPC message(s): {err}"),
+            Error::Event(err) => write!(f, "Failed processing event message(s): {err}"),
+            Error::Enum(err) => write!(f, "Enum error: {err}"),
         }
     }
 }

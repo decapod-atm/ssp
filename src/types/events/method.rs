@@ -174,7 +174,7 @@ impl FromStr for Method {
             "reject" => Self::Reject,
             "stack" => Self::Stack,
             "shutdown" => Self::Shutdown,
-            "dispense" => Self::Dispense,
+            "dispense" | "denomination_dispense" => Self::Dispense,
             "cashbox_removed" => Self::CashboxRemoved,
             "cashbox_replaced" => Self::CashboxReplaced,
             "disabled" => Self::Disabled,
@@ -284,31 +284,31 @@ impl serde::Serialize for Method {
             Self::Stack => serializer.serialize_unit_variant("Method", 5, "stack"),
             Self::Status => serializer.serialize_unit_variant("Method", 6, "status"),
             Self::Shutdown => serializer.serialize_unit_variant("Method", 7, "shutdown"),
-            Self::Dispense => serializer.serialize_unit_variant("Method", 7, "dispense"),
+            Self::Dispense => serializer.serialize_unit_variant("Method", 8, "dispense"),
             Self::CashboxRemoved => {
-                serializer.serialize_unit_variant("Method", 8, "cashbox_removed")
+                serializer.serialize_unit_variant("Method", 9, "cashbox_removed")
             }
             Self::CashboxReplaced => {
-                serializer.serialize_unit_variant("Method", 9, "cashbox_replaced")
+                serializer.serialize_unit_variant("Method", 10, "cashbox_replaced")
             }
-            Self::Disabled => serializer.serialize_unit_variant("Method", 10, "disabled"),
-            Self::FraudAttempt => serializer.serialize_unit_variant("Method", 11, "fraud_attempt"),
+            Self::Disabled => serializer.serialize_unit_variant("Method", 11, "disabled"),
+            Self::FraudAttempt => serializer.serialize_unit_variant("Method", 12, "fraud_attempt"),
             Self::NoteClearedFromFront => {
-                serializer.serialize_unit_variant("Method", 12, "note_cleared_return")
+                serializer.serialize_unit_variant("Method", 13, "note_cleared_return")
             }
             Self::NoteClearedIntoCashbox => {
-                serializer.serialize_unit_variant("Method", 13, "note_cleared_stack")
+                serializer.serialize_unit_variant("Method", 14, "note_cleared_stack")
             }
-            Self::NoteCredit => serializer.serialize_unit_variant("Method", 14, "note_credit"),
-            Self::Read => serializer.serialize_unit_variant("Method", 15, "cash_insertion"),
-            Self::Rejected => serializer.serialize_unit_variant("Method", 16, "rejected"),
-            Self::Rejecting => serializer.serialize_unit_variant("Method", 17, "rejecting"),
-            Self::Reset => serializer.serialize_unit_variant("Method", 18, "reset"),
-            Self::Stacked => serializer.serialize_unit_variant("Method", 19, "stacked"),
-            Self::StackerFull => serializer.serialize_unit_variant("Method", 20, "stacker_full"),
-            Self::Stacking => serializer.serialize_unit_variant("Method", 21, "stacking"),
-            Self::UnsafeJam => serializer.serialize_unit_variant("Method", 22, "unsafe_jam"),
-            Self::Fail => serializer.serialize_unit_variant("Method", 23, "fail"),
+            Self::NoteCredit => serializer.serialize_unit_variant("Method", 15, "note_credit"),
+            Self::Read => serializer.serialize_unit_variant("Method", 16, "cash_insertion"),
+            Self::Rejected => serializer.serialize_unit_variant("Method", 17, "rejected"),
+            Self::Rejecting => serializer.serialize_unit_variant("Method", 18, "rejecting"),
+            Self::Reset => serializer.serialize_unit_variant("Method", 19, "reset"),
+            Self::Stacked => serializer.serialize_unit_variant("Method", 20, "stacked"),
+            Self::StackerFull => serializer.serialize_unit_variant("Method", 21, "stacker_full"),
+            Self::Stacking => serializer.serialize_unit_variant("Method", 22, "stacking"),
+            Self::UnsafeJam => serializer.serialize_unit_variant("Method", 23, "unsafe_jam"),
+            Self::Fail => serializer.serialize_unit_variant("Method", 24, "fail"),
             Self::Reserved(_) => serializer.serialize_unit_variant("Method", 0xff, "reserved"),
         }
     }
