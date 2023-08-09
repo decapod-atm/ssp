@@ -233,8 +233,15 @@ impl EncryptedResponse {
             log::error!("error decrypting response message: {err}");
         }
 
-        super::increment_sequence_count();
-        log::trace!("decryption sequence count: {}", super::sequence_count());
+        log::trace!("decrypted data: {:x?}", plain_data);
+
+        let seq_count = super::sequence_count();
+        let dec_count = dec_msg.count();
+
+        if seq_count != dec_count {
+            log::error!("decryption sequence count is out of sync: have: {dec_count}, expected: {seq_count}");
+            super::set_sequence_count(dec_count.as_inner());
+        }
 
         dec_msg
     }

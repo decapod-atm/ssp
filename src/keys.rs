@@ -219,6 +219,11 @@ mod tests {
         let exp_fixed_key = DEFAULT_FIXED_KEY_U64.to_le_bytes();
 
         assert_eq!(DEFAULT_FIXED_KEY[..8].as_ref(), exp_fixed_key.as_ref());
+
+        assert_eq!(
+            AesKey::from(FixedKey::from_inner(DEFAULT_FIXED_KEY_U64))[..8].as_ref(),
+            [0x67, 0x45, 0x23, 0x01, 0x67, 0x45, 0x23, 0x01].as_ref(),
+        );
     }
 
     #[test]
@@ -257,6 +262,15 @@ mod tests {
         assert_eq!(
             EncryptionKey::from_keys(&dev_inter, &host_rnd, &modulus),
             encrypt_key
+        );
+
+        let dev_inter = IntermediateKey::from_inner(0x04ba466d);
+        let host_rnd = RandomKey::from_inner(0x2d61283d);
+        let modulus = ModulusKey::from_inner(0x2d469703);
+
+        assert_eq!(
+            EncryptionKey::from_keys(&dev_inter, &host_rnd, &modulus),
+            EncryptionKey::from_inner(0x1aeda1fb),
         );
     }
 }

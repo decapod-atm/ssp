@@ -591,12 +591,6 @@ macro_rules! impl_encrypted_message_ops {
             fn init(&mut self) {
                 use $crate::encrypted::encrypted_index as index;
                 self.buf[index::STEX] = $crate::encrypted::STEX;
-
-                let count_start = index::COUNT;
-                let count_end = index::COUNT_END;
-                let count = $crate::encrypted::sequence_count().as_inner().to_be_bytes();
-
-                self.buf[count_start..count_end].copy_from_slice(count.as_ref());
             }
 
             fn buf(&self) -> &[u8] {
@@ -776,16 +770,29 @@ macro_rules! impl_wrapped_message_ops {
                 self.buf[index::STX] = $crate::STX;
                 self.buf[index::SEQ_ID] = $crate::SequenceId::new().into();
                 self.buf[index::LEN] = data_len as u8;
+                self.buf[index::DATA] = $crate::STEX;
             }
 
             fn buf(&self) -> &[u8] {
-                let len = self.data_len() + self.metadata_len();
+                let len = self.data_len() + self.metadata_len() + self.stuffing;
                 self.buf[..len].as_ref()
             }
 
             fn buf_mut(&mut self) -> &mut [u8] {
-                let len = self.data_len() + self.metadata_len();
+                let len = self.data_len() + self.metadata_len() + self.stuffing;
                 self.buf[..len].as_mut()
+            }
+
+            fn as_bytes(&mut self) -> &[u8] {
+                // don't calculate the checksum here, there may be byte stuffing
+                // checksum is calculated when the message is encrypted and wrapped
+                self.buf()
+            }
+
+            fn as_bytes_mut(&mut self) -> &mut [u8] {
+                // don't calculate the checksum here, there may be byte stuffing
+                // checksum is calculated when the message is encrypted and wrapped
+                self.buf_mut()
             }
 
             fn data_len(&self) -> usize {

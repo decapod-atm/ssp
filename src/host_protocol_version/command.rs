@@ -38,6 +38,12 @@ impl HostProtocolVersionCommand {
     pub fn set_version(&mut self, version: ProtocolVersion) {
         self.buf[index::PROTOCOL_VERSION] = version.into();
     }
+
+    /// Builder function that sets the [ProtocolVersion].
+    pub fn with_version(mut self, version: ProtocolVersion) -> Self {
+        self.set_version(version);
+        self
+    }
 }
 
 impl_default!(HostProtocolVersionCommand);

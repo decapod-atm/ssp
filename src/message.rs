@@ -240,7 +240,7 @@ pub trait MessageOps {
         let buf_crc = u16::from_le_bytes(buf[buf_len - 2..].try_into().unwrap());
         let exp_crc = crc16(buf[index::SEQ_ID..buf_len - 2].as_ref());
 
-        if buf_crc != exp_crc {
+        if buf_crc != exp_crc && msg_type != MessageType::Encrypted {
             return Err(Error::Crc((buf_crc, exp_crc)));
         }
 

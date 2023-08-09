@@ -115,6 +115,8 @@ pub enum ResponseStatus {
     /// The device is in encrypted communication mode, but the encryption keys have not been
     /// negotiated.
     KeyNotSet = 0xfa,
+    /// The device has had all its note channels inhibited, and has become disabled for note insertion.
+    ChannelDisable = 0xb5,
     /// Reserved for future use
     Reserved(u8),
 }
@@ -155,6 +157,7 @@ impl ResponseStatus {
             0xf5 => Self::CommandCannotBeProcessed,
             0xf8 => Self::Fail,
             0xfa => Self::KeyNotSet,
+            0xb5 => Self::ChannelDisable,
             res => Self::Reserved(res),
         }
     }
@@ -184,6 +187,7 @@ impl ResponseStatus {
             Self::CommandCannotBeProcessed => 0xf5,
             Self::Fail => 0xf8,
             Self::KeyNotSet => 0xfa,
+            Self::ChannelDisable => 0xb5,
             Self::Reserved(res) => *res,
         }
     }
@@ -197,31 +201,7 @@ impl From<u8> for ResponseStatus {
 
 impl From<ResponseStatus> for u8 {
     fn from(val: ResponseStatus) -> Self {
-        match val {
-            ResponseStatus::NoteClearedFromFront => 0xe1,
-            ResponseStatus::NoteClearedIntoCashbox => 0xe2,
-            ResponseStatus::CashboxRemoved => 0xe3,
-            ResponseStatus::CashboxReplaced => 0xe4,
-            ResponseStatus::FraudAttempt => 0xe6,
-            ResponseStatus::StackerFull => 0xe7,
-            ResponseStatus::Disabled => 0xe8,
-            ResponseStatus::UnsafeJam => 0xe9,
-            ResponseStatus::Stacked => 0xeb,
-            ResponseStatus::Stacking => 0xcc,
-            ResponseStatus::Rejected => 0xec,
-            ResponseStatus::Rejecting => 0xed,
-            ResponseStatus::NoteCredit => 0xee,
-            ResponseStatus::Read => 0xef,
-            ResponseStatus::Ok => 0xf0,
-            ResponseStatus::DeviceReset => 0xf1,
-            ResponseStatus::CommandNotKnown => 0xf2,
-            ResponseStatus::WrongNumberParameters => 0xf3,
-            ResponseStatus::ParameterOutOfRange => 0xf4,
-            ResponseStatus::CommandCannotBeProcessed => 0xf5,
-            ResponseStatus::Fail => 0xf8,
-            ResponseStatus::KeyNotSet => 0xfa,
-            ResponseStatus::Reserved(s) => s,
-        }
+        val.to_u8()
     }
 }
 
@@ -256,6 +236,7 @@ impl From<ResponseStatus> for &'static str {
             ResponseStatus::CommandCannotBeProcessed => "CommandCannotBeProcessed",
             ResponseStatus::Fail => "Fail",
             ResponseStatus::KeyNotSet => "KeyNotSet",
+            ResponseStatus::ChannelDisable => "ChannelDisable",
             ResponseStatus::Reserved(_) => "Reserved",
         }
     }
@@ -271,7 +252,7 @@ impl fmt::Display for ResponseStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Reserved(s) => write!(f, "Reserved(0x{s:02x})"),
-            _ => write!(f, "{}", <&'static str>::from(self)),
+            _ => write!(f, "{}", <&str>::from(self)),
         }
     }
 }

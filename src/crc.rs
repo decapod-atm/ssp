@@ -23,12 +23,22 @@ pub fn crc16(data: &[u8]) -> u16 {
             if crc & 0x8000 != 0 {
                 crc = (crc << 1) ^ CRC_POLY;
             } else {
-                crc = crc.overflowing_shl(1).0;
+                crc = saturating_shl(crc, 1);
             }
         }
     }
 
     crc
+}
+
+fn saturating_shl(b: u16, s: u32) -> u16 {
+    let (res, o) = b.overflowing_shl(s);
+
+    if o {
+        u16::MAX
+    } else {
+        res
+    }
 }
 
 #[cfg(test)]
@@ -97,5 +107,47 @@ mod tests {
             u16::from_be_bytes(data_crc)
         );
         assert_eq!(crc16(enc_data.as_ref()), 0x0000);
+    }
+
+    #[test]
+    fn test_sample() {
+        let data_crc = [0xac, 0x1a];
+        let enc_data = [
+            0x00,
+            0x11,
+            0x7e,
+            0xe5,
+            0x65,
+            0x07,
+            0x0e,
+            0x2a,
+            0x8f,
+            0xab,
+            0xf7,
+            0xdd,
+            0xb3,
+            0x87,
+            0xe6,
+            0x45,
+            0xea,
+            0xb2,
+            0xbb,
+            data_crc[0],
+            data_crc[1],
+        ];
+        assert_eq!(
+            crc16(enc_data[..enc_data.len() - 2].as_ref()),
+            u16::from_be_bytes(data_crc)
+        );
+
+        let enc_crc = [0x95, 0xfb];
+        let enc_data = [
+            0x01, 0x05, 0x00, 0x00, 0x00, 0x07, 0x9c, 0x10, 0x69, 0xd9, 0x37, 0xf4, 0x18, 0x7f,
+            enc_crc[0], enc_crc[1],
+        ];
+        assert_eq!(
+            crc16(enc_data[..enc_data.len() - 2].as_ref()),
+            u16::from_le_bytes(enc_crc)
+        );
     }
 }

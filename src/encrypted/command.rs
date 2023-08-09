@@ -47,6 +47,17 @@ impl EncryptedCommand {
         self.buf[index::COUNT..index::COUNT_END].as_ref()
     }
 
+    fn set_count(&mut self, count: SequenceCount) {
+        self.buf[index::COUNT..index::COUNT_END]
+            .copy_from_slice(count.as_inner().to_le_bytes().as_ref());
+    }
+
+    /// Builder function that sets the [SequenceCount].
+    pub fn with_count(mut self, count: SequenceCount) -> Self {
+        self.set_count(count);
+        self
+    }
+
     /// Gets the message data.
     pub fn message_data(&self) -> &[u8] {
         let start = self.data_start();
@@ -75,27 +86,35 @@ impl EncryptedCommand {
     /// encrypted message is wrapped in an outer standard SSP message.
     ///
     /// Matryoshka dolls all the way down...
-    pub fn set_message_data(&mut self, message: &mut dyn CommandOps) -> Result<()> {
+    pub fn set_message_data(&mut self, message: &dyn CommandOps) -> Result<()> {
         let len = message.data_len();
 
         if message.data().len() != len {
             return Err(Error::InvalidDataLength((len, message.data().len())));
         }
 
-        message.calculate_checksum();
-
         if (0..=len::MAX_ENCRYPTED_DATA).contains(&len) {
-            self.buf[index::LEN] = len as u8;
+            self.set_data_len(len as u8);
 
             let start = self.data_start();
             let end = self.data_end();
 
-            self.buf[start..end].copy_from_slice(message.data());
+            let data = message.data();
+
+            log::trace!("Encrypted data: {data:x?}, length: {len}");
+
+            self.buf[start..end].copy_from_slice(data);
 
             Ok(())
         } else {
             Err(Error::InvalidDataLength((len, len::MAX_ENCRYPTED_DATA)))
         }
+    }
+
+    /// Builder function that sets the message data.
+    pub fn with_message_data(mut self, message: &dyn CommandOps) -> Result<Self> {
+        self.set_message_data(message)?;
+        Ok(self)
     }
 
     /// Gets random packing data used to make the encrypted packet a mutliple of the [AES block
@@ -133,7 +152,10 @@ impl EncryptedCommand {
         let start = self.packing_start();
         let end = self.packing_end();
 
+        #[cfg(not(test))]
         rng.fill_bytes(&mut self.buf[start..end]);
+        #[cfg(test)]
+        self.buf[start..end].copy_from_slice([0; 255][..end - start].as_ref());
     }
 
     /// Adds random packing data to make the encrypted packet a mutliple of the [AES block
@@ -155,7 +177,10 @@ impl EncryptedCommand {
         let start = self.packing_start();
         let end = self.packing_end();
 
+        #[cfg(not(test))]
         rng.fill_bytes(&mut self.buf[start..end]);
+        #[cfg(test)]
+        self.buf[start..end].copy_from_slice([0; 255][..end - start].as_ref());
     }
 
     fn packing_start(&self) -> usize {
@@ -185,9 +210,15 @@ impl EncryptedCommand {
     ///
     /// Converts the [EncryptedCommand] message into a standard [WrappedEncryptedMessage].
     pub fn encrypt(mut self, key: &AesKey) -> WrappedEncryptedMessage {
-        use crate::aes;
+        //use crate::aes;
+        use aes::cipher::{BlockEncrypt, KeyInit};
 
         self.set_packing();
+
+        if super::sequence_count().as_inner() != 0 {
+            self.set_count(super::sequence_count());
+        }
+
         self.calculate_checksum();
 
         let mut enc_msg = WrappedEncryptedMessage::new();
@@ -195,19 +226,35 @@ impl EncryptedCommand {
         let enc_len = self.len();
         enc_msg.set_data_len(enc_len as u8);
 
+        log::trace!("Encrypted message: {:x?}", self.buf());
+
         let plain_data = self.encrypt_data();
         let cipher_data = enc_msg.data_mut()[1..].as_mut();
 
-        if let Err(err) = aes::aes_encrypt_inplace(key.as_ref(), plain_data, cipher_data) {
-            log::error!("error encrypting message: {err}");
+        let ciph = aes::Aes128::new(key);
+
+        for (pchunk, cchunk) in plain_data
+            .chunks_exact(16)
+            .zip(cipher_data.chunks_exact_mut(16))
+        {
+            ciph.encrypt_block_b2b(pchunk.into(), cchunk.into());
         }
 
-        super::increment_sequence_count();
-        log::trace!("encryption sequence count: {}", super::sequence_count());
+        enc_msg.calculate_checksum();
+        if let Err(err) = enc_msg.verify_checksum() {
+            log::error!("error validating wrapped encrypted checksum: {err}");
+        }
 
         if let Err(err) = enc_msg.stuff_encrypted_data() {
             log::error!("error stuffing encrypted command message: {err}");
         }
+
+        log::trace!("encryption sequence count: {}", super::sequence_count());
+        #[cfg(any(not(test), feature = "test-crypto"))]
+        log::trace!(
+            "next encryption sequence count: {}",
+            super::increment_sequence_count()
+        );
 
         enc_msg
     }
