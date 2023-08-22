@@ -1,4 +1,4 @@
-use crate::{impl_default, std::fmt};
+use crate::std::fmt;
 
 /// Type of command and response message.
 ///
@@ -98,6 +98,10 @@ pub enum MessageType {
     /// Causes the validator to continue processing after returning repeating
     /// [PollWithAckResponse](crate::PollWithAckResponse) messages.
     EventAck = 0x57,
+    /// Disables a device with an attached payout module.
+    DisablePayout = 0x5b,
+    /// Enables a device with an attached payout module to store/payout notes.
+    EnablePayout = 0x5c,
     /// SSP Set Encryption Key - sets the fixed encryption key to the user-supplied value.
     SetEncryptionKey = 0x60,
     /// SSP Encryption Reset to Default - resets the fixed encryption key to the default value.
@@ -152,6 +156,8 @@ impl From<u8> for MessageType {
             0x54 => Self::ConfigureBezel,
             0x56 => Self::PollWithAck,
             0x57 => Self::EventAck,
+            0x5b => Self::DisablePayout,
+            0x5c => Self::EnablePayout,
             0x60 => Self::SetEncryptionKey,
             0x61 => Self::EncryptionReset,
             0x7e => Self::Encrypted,
@@ -209,6 +215,8 @@ impl From<MessageType> for &'static str {
             MessageType::ConfigureBezel => "ConfigureBezel",
             MessageType::PollWithAck => "PollWithAck",
             MessageType::EventAck => "EventAck",
+            MessageType::DisablePayout => "DisablePayout",
+            MessageType::EnablePayout => "EnablePayout",
             MessageType::SetEncryptionKey => "SetEncryptionKey",
             MessageType::EncryptionReset => "EncryptionReset",
             MessageType::Encrypted => "Encrypted",

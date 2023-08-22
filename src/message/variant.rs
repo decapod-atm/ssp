@@ -1,13 +1,14 @@
 use crate::{
     ChannelValueDataResponse, ConfigureBezelResponse, DatasetVersionResponse, DisableResponse,
-    DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnableResponse, EncryptionResetResponse,
-    Error, EventAckResponse, GetBarcodeDataResponse, GetBarcodeInhibitResponse,
-    GetBarcodeReaderConfigurationResponse, HoldResponse, HostProtocolVersionResponse,
-    LastRejectCodeResponse, MessageType, PollResponse, PollWithAckResponse, RejectResponse,
-    RequestKeyExchangeResponse, ResponseOps, Result, SerialNumberResponse,
-    SetBarcodeInhibitResponse, SetBarcodeReaderConfigurationResponse, SetEncryptionKeyResponse,
-    SetGeneratorResponse, SetInhibitsResponse, SetModulusResponse, SetupRequestResponse,
-    SmartEmptyResponse, SyncResponse, UnitDataResponse, WrappedEncryptedMessage,
+    DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnablePayoutResponse, EnableResponse,
+    EncryptionResetResponse, Error, EventAckResponse, GetBarcodeDataResponse,
+    GetBarcodeInhibitResponse, GetBarcodeReaderConfigurationResponse, HoldResponse,
+    HostProtocolVersionResponse, LastRejectCodeResponse, MessageType, PollResponse,
+    PollWithAckResponse, RejectResponse, RequestKeyExchangeResponse, ResponseOps, Result,
+    SerialNumberResponse, SetBarcodeInhibitResponse, SetBarcodeReaderConfigurationResponse,
+    SetEncryptionKeyResponse, SetGeneratorResponse, SetInhibitsResponse, SetModulusResponse,
+    SetupRequestResponse, SmartEmptyResponse, SyncResponse, UnitDataResponse,
+    WrappedEncryptedMessage,
 };
 
 /// Message variant types
@@ -25,6 +26,7 @@ pub enum MessageVariant {
     EmptyResponse(EmptyResponse),
     EncryptionResetResponse(EncryptionResetResponse),
     EnableResponse(EnableResponse),
+    EnablePayoutResponse(EnablePayoutResponse),
     EventAckResponse(EventAckResponse),
     GetBarcodeDataResponse(GetBarcodeDataResponse),
     GetBarcodeInhibitResponse(GetBarcodeInhibitResponse),
@@ -70,6 +72,7 @@ impl MessageVariant {
                 Self::EncryptionResetResponse(EncryptionResetResponse::new())
             }
             MessageType::Enable => Self::EnableResponse(EnableResponse::new()),
+            MessageType::EnablePayout => Self::EnablePayoutResponse(EnablePayoutResponse::new()),
             MessageType::EventAck => Self::EventAckResponse(EventAckResponse::new()),
             MessageType::GetBarcodeData => {
                 Self::GetBarcodeDataResponse(GetBarcodeDataResponse::new())
@@ -130,6 +133,7 @@ impl MessageVariant {
             Self::DisplayOnResponse(msg) => msg,
             Self::EmptyResponse(msg) => msg,
             Self::EnableResponse(msg) => msg,
+            Self::EnablePayoutResponse(msg) => msg,
             Self::EncryptionResetResponse(msg) => msg,
             Self::EventAckResponse(msg) => msg,
             Self::GetBarcodeDataResponse(msg) => msg,
@@ -168,6 +172,7 @@ impl MessageVariant {
             Self::DisplayOnResponse(msg) => msg,
             Self::EmptyResponse(msg) => msg,
             Self::EnableResponse(msg) => msg,
+            Self::EnablePayoutResponse(msg) => msg,
             Self::EncryptionResetResponse(msg) => msg,
             Self::EventAckResponse(msg) => msg,
             Self::GetBarcodeDataResponse(msg) => msg,
@@ -460,6 +465,33 @@ impl MessageVariant {
     pub fn into_enable_response(self) -> Result<EnableResponse> {
         match self {
             Self::EnableResponse(msg) => Ok(msg),
+            _ => Err(Error::InvalidMessage(self.message_type())),
+        }
+    }
+
+    /// Gets whether the [MessageVariant] contains an [EnablePayoutResponse] message.
+    pub fn is_enable_payout_response(&self) -> bool {
+        matches!(self, Self::EnablePayoutResponse(_))
+    }
+
+    /// Gets a reference to the [MessageVariant] as an [EnablePayoutResponse].
+    ///
+    /// Returns an [Error] if the [MessageVariant] does not contain a [EnablePayoutResponse].
+    pub fn as_enable_payout_response(&self) -> Result<&EnablePayoutResponse> {
+        match self {
+            Self::EnablePayoutResponse(msg) => Ok(msg),
+            _ => Err(Error::InvalidMessage(self.message_type())),
+        }
+    }
+
+    /// Converts the [MessageVariant] into an [EnablePayoutResponse].
+    ///
+    /// Consumes the [MessageVariant].
+    ///
+    /// Returns an [Error] if the [MessageVariant] does not contain a [EnablePayoutResponse].
+    pub fn into_enable_payout_response(self) -> Result<EnablePayoutResponse> {
+        match self {
+            Self::EnablePayoutResponse(msg) => Ok(msg),
             _ => Err(Error::InvalidMessage(self.message_type())),
         }
     }
@@ -1095,6 +1127,9 @@ impl MessageVariant {
             }
             MessageType::Empty => Ok(Self::EmptyResponse(EmptyResponse::try_from(buf)?)),
             MessageType::Enable => Ok(Self::EnableResponse(EnableResponse::try_from(buf)?)),
+            MessageType::EnablePayout => Ok(Self::EnablePayoutResponse(
+                EnablePayoutResponse::try_from(buf)?,
+            )),
             MessageType::EncryptionReset => Ok(Self::EncryptionResetResponse(
                 EncryptionResetResponse::try_from(buf)?,
             )),
