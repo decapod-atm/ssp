@@ -10,6 +10,7 @@ use crate::{
 #[derive(Clone, Debug, PartialEq, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
 pub struct WrappedEncryptedMessage {
     buf: [u8; len::WRAPPED_ENCRYPTED_MESSAGE],
+    stuffing: usize,
 }
 
 impl WrappedEncryptedMessage {
@@ -17,6 +18,7 @@ impl WrappedEncryptedMessage {
     pub fn new() -> Self {
         let mut msg = Self {
             buf: [0u8; len::WRAPPED_ENCRYPTED_MESSAGE],
+            stuffing: 0,
         };
 
         msg.init();
@@ -40,9 +42,14 @@ impl WrappedEncryptedMessage {
         self.buf[start..end].as_ref()
     }
 
+    /// Gets whether the [WrappedEncryptedMessage] contains byte stuffing (repeated `0x7f` bytes).
+    pub fn is_stuffed(&self) -> bool {
+        self.stuffing != 0
+    }
+
     /// Adds byte stuffing to the encrypted message data to avoid devices thinking we started a new
     /// packet in the middle of an encrypted packet.
-    pub(crate) fn stuff_encrypted_data(&mut self) -> Result<usize> {
+    pub fn stuff_encrypted_data(&mut self) -> Result<usize> {
         use super::stuff;
         use crate::message::index;
 
@@ -50,11 +57,14 @@ impl WrappedEncryptedMessage {
         // end after the CRC data
         let end = start + self.data_len() + 2;
 
-        stuff(&mut self.buf[start..], end)
+        let new_end = stuff(&mut self.buf[start..], end)?;
+        self.stuffing = new_end.saturating_sub(end);
+
+        Ok(self.stuffing)
     }
 
     /// Removes byte stuffing from the encrypted message data.
-    pub(crate) fn unstuff_encrypted_data(&mut self) -> Result<()> {
+    pub fn unstuff_encrypted_data(&mut self) -> Result<()> {
         use super::unstuff;
         use crate::message::{index, STX};
 
@@ -81,6 +91,7 @@ impl WrappedEncryptedMessage {
         if calc_end != exp_end {
             Err(Error::InvalidLength((calc_end, exp_end)))
         } else {
+            self.stuffing = 0;
             Ok(())
         }
     }

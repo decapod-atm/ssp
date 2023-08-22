@@ -31,6 +31,11 @@ pub fn sequence_count() -> SequenceCount {
     SEQUENCE_COUNT.load(Ordering::Relaxed).into()
 }
 
+/// Sets the current [SequenceCount].
+pub fn set_sequence_count(count: u32) {
+    SEQUENCE_COUNT.store(count, Ordering::SeqCst);
+}
+
 /// Increments the [SequenceCount].
 ///
 /// Returns the new [SequenceCount].
@@ -134,9 +139,9 @@ pub fn unstuff(buf: &mut [u8], mut end: usize) -> Result<usize> {
     Ok(end)
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 pub mod tests {
-    use crate::{len, AesKey, MessageOps, Result};
+    use crate::{len, std::sync::Mutex, AesKey, MessageOps, Result};
 
     use super::*;
 
@@ -145,6 +150,9 @@ pub mod tests {
         b'p',
     ];
 
+    // Add a mutex to run tests one at a time
+    static T: Mutex<()> = Mutex::new(());
+
     fn test_key() -> AesKey {
         AesKey::clone_from_slice(TEST_KEY.as_ref())
     }
@@ -152,6 +160,8 @@ pub mod tests {
     #[test]
     fn test_command_encryption() -> Result<()> {
         use crate::PollCommand;
+
+        let _lock = T.lock();
 
         let key = test_key();
 
@@ -175,6 +185,8 @@ pub mod tests {
     fn test_response_encryption() -> Result<()> {
         use crate::{PollResponse, ResponseOps, ResponseStatus};
 
+        let _lock = T.lock();
+
         let key = test_key();
 
         let mut poll_msg = PollResponse::new();
@@ -197,6 +209,8 @@ pub mod tests {
 
     #[test]
     fn test_byte_stuffing() -> Result<()> {
+        let _lock = T.lock();
+
         let mut buf = [0x7f, 0xaa, 0xbb, 0x00];
         let exp = [0x7f, 0x7f, 0xaa, 0xbb];
         let end = 2;
@@ -234,6 +248,8 @@ pub mod tests {
 
     #[test]
     fn test_byte_unstuffing() -> Result<()> {
+        let _lock = T.lock();
+
         let mut buf = [0x7f, 0x7f, 0xaa, 0xbb];
         let exp = [0x7f, 0xaa, 0xbb, 0x00];
         let end = buf.len() - 1;
@@ -267,5 +283,72 @@ pub mod tests {
         assert_eq!(new_end, exp_end);
 
         Ok(())
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_stuffing() -> Result<()> {
+        use crate::PollCommand;
+
+        let _lock = T.lock();
+
+        let mut msg = PollCommand::new();
+        let _clear_csum = msg.calculate_checksum();
+
+        let key = AesKey::from([
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14,
+            0x15, 0x16,
+        ]);
+
+        #[cfg(feature = "std")]
+        println!("Clear-text command buffer: {:x?}", msg.buf());
+
+        let mut enc_msg = EncryptedCommand::new();
+
+        enc_msg.set_message_data(&mut msg)?;
+        let wrap_msg = enc_msg.encrypt(&key);
+
+        let _wrap_csum = wrap_msg.checksum();
+
+        #[cfg(feature = "std")]
+        println!("Wrapped encrypted command buffer: {:x?}", wrap_msg.buf());
+
+        let dec_msg = EncryptedResponse::decrypt(&key, wrap_msg);
+
+        dec_msg.verify_checksum()?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_encrypt_known_keys() -> Result<()> {
+        use crate::{HostProtocolVersionCommand, ProtocolVersion};
+
+        let _lock = T.lock();
+
+        let key = AesKey::from([
+            0x67, 0x45, 0x23, 0x01, 0x67, 0x45, 0x23, 0x01, 0x5e, 0xfa, 0xe5, 0x0d, 0x00, 0x00,
+            0x00, 0x00,
+        ]);
+
+        let exp_enc_bytes = [
+            0x7f, 0x80, 0x11, 0x7e, 0x86, 0x01, 0xf3, 0xa7, 0x85, 0xec, 0x6f, 0x4b, 0x3d, 0x0f,
+            0xf0, 0xfe, 0xd4, 0x8d, 0x16, 0x64, 0x2a, 0x23,
+        ];
+
+        let msg = HostProtocolVersionCommand::new().with_version(ProtocolVersion::Six);
+
+        set_sequence_count(0);
+
+        let mut wrap_msg = EncryptedCommand::new()
+            .with_count(0u32.into())
+            .with_message_data(&msg)?
+            .encrypt(&key);
+
+        wrap_msg.set_sequence_id(128u8.into());
+        wrap_msg.calculate_checksum();
+
+        assert_eq!(wrap_msg.buf(), exp_enc_bytes.as_ref());
+
+        wrap_msg.verify_checksum()
     }
 }
