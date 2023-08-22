@@ -166,40 +166,28 @@ impl fmt::Display for EventPayload {
     }
 }
 
-inner_enum!(EventPayload, Error, as_error);
-inner_enum!(EventPayload, DisableEvent, as_disable_event);
-inner_enum!(EventPayload, DispenseEvent, as_dispense_event);
-inner_enum!(EventPayload, EnableEvent, as_enable_event);
-inner_enum!(EventPayload, RejectEvent, as_reject_event);
-inner_enum!(EventPayload, StackEvent, as_stack_event);
-inner_enum!(EventPayload, StatusEvent, as_status_event);
-inner_enum!(EventPayload, CashboxRemovedEvent, as_cashbox_removed_event);
-inner_enum!(
-    EventPayload,
-    CashboxReplacedEvent,
-    as_cashbox_replaced_event
-);
-inner_enum!(EventPayload, DisabledEvent, as_disabled_event);
-inner_enum!(EventPayload, FraudAttemptEvent, as_fraud_attempt_event);
-inner_enum!(
-    EventPayload,
-    NoteClearedFromFrontEvent,
-    as_note_cleared_from_front_event
-);
-inner_enum!(
-    EventPayload,
-    NoteClearedIntoCashboxEvent,
-    as_note_cleared_into_cashbox_event
-);
-inner_enum!(EventPayload, NoteCreditEvent, as_note_credit_event);
-inner_enum!(EventPayload, ReadEvent, as_read_event);
-inner_enum!(EventPayload, RejectedEvent, as_rejected_event);
-inner_enum!(EventPayload, RejectingEvent, as_rejecting_event);
-inner_enum!(EventPayload, ResetEvent, as_reset_event);
-inner_enum!(EventPayload, StackedEvent, as_stacked_event);
-inner_enum!(EventPayload, StackerFullEvent, as_stacker_full_event);
-inner_enum!(EventPayload, StackingEvent, as_stacking_event);
-inner_enum!(EventPayload, UnsafeJamEvent, as_unsafe_jam_event);
+inner_enum!(EventPayload, Error);
+inner_enum!(EventPayload, DisableEvent);
+inner_enum!(EventPayload, DispenseEvent);
+inner_enum!(EventPayload, EnableEvent);
+inner_enum!(EventPayload, RejectEvent);
+inner_enum!(EventPayload, StackEvent);
+inner_enum!(EventPayload, StatusEvent);
+inner_enum!(EventPayload, CashboxRemovedEvent);
+inner_enum!(EventPayload, CashboxReplacedEvent);
+inner_enum!(EventPayload, DisabledEvent);
+inner_enum!(EventPayload, FraudAttemptEvent);
+inner_enum!(EventPayload, NoteClearedFromFrontEvent);
+inner_enum!(EventPayload, NoteClearedIntoCashboxEvent);
+inner_enum!(EventPayload, NoteCreditEvent);
+inner_enum!(EventPayload, ReadEvent);
+inner_enum!(EventPayload, RejectedEvent);
+inner_enum!(EventPayload, RejectingEvent);
+inner_enum!(EventPayload, ResetEvent);
+inner_enum!(EventPayload, StackedEvent);
+inner_enum!(EventPayload, StackerFullEvent);
+inner_enum!(EventPayload, StackingEvent);
+inner_enum!(EventPayload, UnsafeJamEvent);
 
 macro_rules! from_event_for_payload {
     ($event:ident) => {

@@ -1160,48 +1160,40 @@ macro_rules! make_list {
     };
 }
 
-/// Matches a new-type enum's inner type, and returns a reference to the matched variant.
-///
-/// `fn` parameter should be the function name of the accessor, e.g. for `TypeName` => `as_type_name`
+/// Provides convenience functions to deconstruct an enum with new-type variants.
 #[macro_export]
 macro_rules! inner_enum {
-    // macro for when the variant and its wrapped type have the same name
-    ($enum:tt, $inner:tt, $fn:ident) => {
-        impl $enum {
-            pub fn $fn(&self) -> $crate::Result<&$inner> {
-                match self {
-                    $enum::$inner(evt) => Ok(evt),
-                    _ => {
-                        #[cfg(not(feature = "std"))]
-                        use core::any;
-                        #[cfg(feature = "std")]
-                        use std::any;
+    // macro variant for when the enum variant and its type are the same ident
+    ($ty:ident, $var:ident) => {
+        inner_enum!($ty, $var, $var);
+    };
 
-                        let name = any::type_name::<$inner>();
-                        Err($crate::Error::Enum(format!(
-                            "invalid enum variant, expected: {name}, have: {self}"
-                        )))
+    // macro variant for when the enum variant and its type are potentially different
+    ($ty:ident, $var:ident, $var_ty:ident) => {
+        impl $ty {
+            ::paste::paste! {
+                #[doc = "Gets whether `" $ty "` is the variant `" $var "`."]
+                pub fn [<is_ $var:snake>](&self) -> bool {
+                    matches!(self, $ty::$var(_))
+                }
+
+                #[doc = "Gets a reference to `" $ty "` as the variant `" $var "`'s inner type `" $var_ty "`."]
+                pub fn [<as_ $var:snake>](&self) -> $crate::Result<&$var_ty> {
+                    use $crate::Error;
+
+                    match self {
+                        $ty::$var(ty) => Ok(ty),
+                        _ => Err(Error::Enum(format!("have variant: {self}, expected: {}", $crate::std::any::type_name::<$var>()))),
                     }
                 }
-            }
-        }
-    };
-    // macro for when the variant and its wrapped type have different names
-    ($enum:tt, $inner:tt, $inner_ty:tt, $fn:ident) => {
-        impl $enum {
-            pub fn $fn(&self) -> $crate::Result<&$inner_ty> {
-                match self {
-                    $enum::$inner(ty) => Ok(ty),
-                    _ => {
-                        #[cfg(not(feature = "std"))]
-                        use core::any;
-                        #[cfg(feature = "std")]
-                        use std::any;
 
-                        let name = any::type_name::<$inner_ty>();
-                        Err($crate::Error::Enum(format!(
-                            "invalid enum variant, expected: {name}, have: {self}"
-                        )))
+                #[doc = "Converts `" $ty "` into the variant `" $var "`'s inner type `" $var_ty "`."]
+                pub fn [<into_ $var:snake>](self) -> $crate::Result<$var_ty> {
+                    use $crate::Error;
+
+                    match self {
+                        $ty::$var(ty) => Ok(ty),
+                        _ => Err(Error::Enum(format!("have variant: {self}, expected: {}", $crate::std::any::type_name::<$var>()))),
                     }
                 }
             }
