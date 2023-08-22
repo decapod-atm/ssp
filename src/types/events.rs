@@ -1,6 +1,6 @@
 //! Event types for polling responses.
 
-use crate::{inner_enum, std::fmt, Error};
+use crate::{std::fmt, Error};
 
 mod cashbox_removed;
 mod cashbox_replaced;
