@@ -25,6 +25,7 @@ use core as std;
 #[allow(clippy::single_component_path_imports)]
 use std;
 
+#[macro_use]
 mod macros;
 
 pub mod aes;
@@ -35,10 +36,12 @@ pub mod configure_bezel;
 pub mod crc;
 pub mod dataset_version;
 pub mod disable;
+pub mod disable_payout;
 pub mod display_off;
 pub mod display_on;
 pub mod empty;
 pub mod enable;
+pub mod enable_payout;
 pub mod encrypted;
 pub mod encryption_reset;
 pub mod error;
@@ -80,10 +83,12 @@ pub use channels::*;
 pub use configure_bezel::*;
 pub use dataset_version::*;
 pub use disable::*;
+pub use disable_payout::*;
 pub use display_off::*;
 pub use display_on::*;
 pub use empty::*;
 pub use enable::*;
+pub use enable_payout::*;
 pub use encrypted::*;
 pub use encryption_reset::*;
 pub use error::*;

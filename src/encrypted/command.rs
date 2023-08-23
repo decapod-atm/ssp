@@ -1,8 +1,9 @@
+#[cfg(not(test))]
 use rand_chacha::rand_core::RngCore;
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(test), not(feature = "std")))]
 use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(test), not(feature = "std")))]
 use crate::seed;
 
 use crate::{
@@ -147,6 +148,7 @@ impl EncryptedCommand {
         }
 
         // Less robust than using rand::thread_rng, but still better than PKCS#7 padding...
+        #[cfg(not(test))]
         let mut rng = ChaCha20Rng::from_seed(seed(self.buf(), self.count_buf()));
 
         let start = self.packing_start();
@@ -249,12 +251,11 @@ impl EncryptedCommand {
             log::error!("error stuffing encrypted command message: {err}");
         }
 
-        log::trace!("encryption sequence count: {}", super::sequence_count());
-        #[cfg(any(not(test), feature = "test-crypto"))]
-        log::trace!(
-            "next encryption sequence count: {}",
-            super::increment_sequence_count()
-        );
+        let count = super::sequence_count();
+        let next_count = super::increment_sequence_count();
+
+        log::trace!("encryption sequence count: {count}");
+        log::trace!("next encryption sequence count: {next_count}");
 
         enc_msg
     }
