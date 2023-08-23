@@ -1,7 +1,7 @@
 use crate::{
-    std::fmt, ChannelValueDataResponse, ConfigureBezelResponse, DatasetVersionResponse, DisableResponse,
-    DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnablePayoutResponse, EnableResponse,
-    EncryptionResetResponse, Error, EventAckResponse, GetBarcodeDataResponse,
+    std::fmt, ChannelValueDataResponse, ConfigureBezelResponse, DatasetVersionResponse,
+    DisableResponse, DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnablePayoutResponse,
+    EnableResponse, EncryptionResetResponse, Error, EventAckResponse, GetBarcodeDataResponse,
     GetBarcodeInhibitResponse, GetBarcodeReaderConfigurationResponse, HoldResponse,
     HostProtocolVersionResponse, LastRejectCodeResponse, MessageType, PollResponse,
     PollWithAckResponse, RejectResponse, RequestKeyExchangeResponse, ResponseOps, Result,
@@ -10,6 +10,9 @@ use crate::{
     SetupRequestResponse, SmartEmptyResponse, SyncResponse, UnitDataResponse,
     WrappedEncryptedMessage,
 };
+
+#[cfg(test)]
+mod tests;
 
 /// Message variant types
 ///
@@ -348,11 +351,17 @@ impl fmt::Display for MessageVariant {
             Self::EventAckResponse(msg) => write!(f, "EventAckResponse({msg})"),
             Self::GetBarcodeDataResponse(msg) => write!(f, "GetBarcodeDataResponse({msg})"),
             Self::GetBarcodeInhibitResponse(msg) => write!(f, "GetBarcodeInhibitResponse({msg})"),
-            Self::GetBarcodeReaderConfigurationResponse(msg) => write!(f, "GetBarcodeReaderConfigurationResponse({msg})"),
+            Self::GetBarcodeReaderConfigurationResponse(msg) => {
+                write!(f, "GetBarcodeReaderConfigurationResponse({msg})")
+            }
             Self::SetBarcodeInhibitResponse(msg) => write!(f, "SetBarcodeInhibitResponse({msg})"),
-            Self::SetBarcodeReaderConfigurationResponse(msg) => write!(f, "SetBarcodeReaderConfigurationResponse({msg})"),
+            Self::SetBarcodeReaderConfigurationResponse(msg) => {
+                write!(f, "SetBarcodeReaderConfigurationResponse({msg})")
+            }
             Self::HoldResponse(msg) => write!(f, "HoldResponse({msg})"),
-            Self::HostProtocolVersionResponse(msg) => write!(f, "HostProtocolVersionResponse({msg})"),
+            Self::HostProtocolVersionResponse(msg) => {
+                write!(f, "HostProtocolVersionResponse({msg})")
+            }
             Self::LastRejectCodeResponse(msg) => write!(f, "LastRejectCodeResponse({msg})"),
             Self::PollResponse(msg) => write!(f, "PollResponse({msg})"),
             Self::PollWithAckResponse(msg) => write!(f, "PollWithAckResponse({msg})"),
