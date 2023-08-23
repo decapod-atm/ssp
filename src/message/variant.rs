@@ -1,9 +1,9 @@
 use crate::{
     std::fmt, ChannelValueDataResponse, ConfigureBezelResponse, DatasetVersionResponse,
-    DisableResponse, DisplayOffResponse, DisplayOnResponse, EmptyResponse, EnablePayoutResponse,
-    EnableResponse, EncryptionResetResponse, Error, EventAckResponse, GetBarcodeDataResponse,
-    GetBarcodeInhibitResponse, GetBarcodeReaderConfigurationResponse, HoldResponse,
-    HostProtocolVersionResponse, LastRejectCodeResponse, MessageType, PollResponse,
+    DisablePayoutResponse, DisableResponse, DisplayOffResponse, DisplayOnResponse, EmptyResponse,
+    EnablePayoutResponse, EnableResponse, EncryptionResetResponse, Error, EventAckResponse,
+    GetBarcodeDataResponse, GetBarcodeInhibitResponse, GetBarcodeReaderConfigurationResponse,
+    HoldResponse, HostProtocolVersionResponse, LastRejectCodeResponse, MessageType, PollResponse,
     PollWithAckResponse, RejectResponse, RequestKeyExchangeResponse, ResponseOps, Result,
     SerialNumberResponse, SetBarcodeInhibitResponse, SetBarcodeReaderConfigurationResponse,
     SetEncryptionKeyResponse, SetGeneratorResponse, SetInhibitsResponse, SetModulusResponse,
@@ -24,6 +24,7 @@ pub enum MessageVariant {
     ConfigureBezelResponse(ConfigureBezelResponse),
     DatasetVersionResponse(DatasetVersionResponse),
     DisableResponse(DisableResponse),
+    DisablePayoutResponse(DisablePayoutResponse),
     DisplayOffResponse(DisplayOffResponse),
     DisplayOnResponse(DisplayOnResponse),
     EmptyResponse(EmptyResponse),
@@ -68,6 +69,7 @@ impl MessageVariant {
                 Self::DatasetVersionResponse(DatasetVersionResponse::new())
             }
             MessageType::Disable => Self::DisableResponse(DisableResponse::new()),
+            MessageType::DisablePayout => Self::DisablePayoutResponse(DisablePayoutResponse::new()),
             MessageType::DisplayOff => Self::DisplayOffResponse(DisplayOffResponse::new()),
             MessageType::DisplayOn => Self::DisplayOnResponse(DisplayOnResponse::new()),
             MessageType::Empty => Self::EmptyResponse(EmptyResponse::new()),
@@ -132,6 +134,7 @@ impl MessageVariant {
             Self::ConfigureBezelResponse(msg) => msg,
             Self::DatasetVersionResponse(msg) => msg,
             Self::DisableResponse(msg) => msg,
+            Self::DisablePayoutResponse(msg) => msg,
             Self::DisplayOffResponse(msg) => msg,
             Self::DisplayOnResponse(msg) => msg,
             Self::EmptyResponse(msg) => msg,
@@ -171,6 +174,7 @@ impl MessageVariant {
             Self::ConfigureBezelResponse(msg) => msg,
             Self::DatasetVersionResponse(msg) => msg,
             Self::DisableResponse(msg) => msg,
+            Self::DisablePayoutResponse(msg) => msg,
             Self::DisplayOffResponse(msg) => msg,
             Self::DisplayOnResponse(msg) => msg,
             Self::EmptyResponse(msg) => msg,
@@ -223,6 +227,9 @@ impl MessageVariant {
                 DatasetVersionResponse::try_from(buf)?,
             )),
             MessageType::Disable => Ok(Self::DisableResponse(DisableResponse::try_from(buf)?)),
+            MessageType::DisablePayout => Ok(Self::DisablePayoutResponse(
+                DisablePayoutResponse::try_from(buf)?,
+            )),
             MessageType::DisplayOff => {
                 Ok(Self::DisplayOffResponse(DisplayOffResponse::try_from(buf)?))
             }
@@ -305,6 +312,7 @@ inner_enum!(MessageVariant, ChannelValueDataResponse);
 inner_enum!(MessageVariant, ConfigureBezelResponse);
 inner_enum!(MessageVariant, DatasetVersionResponse);
 inner_enum!(MessageVariant, DisableResponse);
+inner_enum!(MessageVariant, DisablePayoutResponse);
 inner_enum!(MessageVariant, DisplayOffResponse);
 inner_enum!(MessageVariant, DisplayOnResponse);
 inner_enum!(MessageVariant, EmptyResponse);
@@ -342,6 +350,7 @@ impl fmt::Display for MessageVariant {
             Self::ConfigureBezelResponse(msg) => write!(f, "ConfigureBezelResponse({msg})"),
             Self::DatasetVersionResponse(msg) => write!(f, "DatasetVersionResponse({msg})"),
             Self::DisableResponse(msg) => write!(f, "DisableResponse({msg})"),
+            Self::DisablePayoutResponse(msg) => write!(f, "DisablePayoutResponse({msg})"),
             Self::DisplayOffResponse(msg) => write!(f, "DisplayOffResponse({msg})"),
             Self::DisplayOnResponse(msg) => write!(f, "DisplayOnResponse({msg})"),
             Self::EmptyResponse(msg) => write!(f, "EmptyResponse({msg})"),

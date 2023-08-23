@@ -158,6 +158,10 @@ pub const PAYOUT_BLOCK: usize = 9;
 pub const ENABLE_PAYOUT_COMMAND: usize = 7;
 /// EnablePayout Response full message length.
 pub const ENABLE_PAYOUT_RESPONSE: usize = 6;
+/// DisablePayout Command full message length.
+pub const DISABLE_PAYOUT_COMMAND: usize = 6;
+/// DisablePayout Response full message length.
+pub const DISABLE_PAYOUT_RESPONSE: usize = 6;
 /// Encrypted Command full message length.
 ///
 /// Because encrypted messages have variable lengths, set the static length to maximum

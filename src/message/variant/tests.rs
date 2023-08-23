@@ -167,6 +167,21 @@ fn test_variant_enable_payout_destructure() -> Result<()> {
 }
 
 #[test]
+fn test_variant_disable_payout_destructure() -> Result<()> {
+    let mut exp_msg = DisablePayoutResponse::new();
+    exp_msg.calculate_checksum();
+
+    let exp_msg_type = exp_msg.message_type();
+    let var = MessageVariant::from_buf(exp_msg.buf(), exp_msg_type)?;
+
+    assert!(var.is_disable_payout_response());
+    assert_eq!(var.as_disable_payout_response()?, &exp_msg);
+    assert_eq!(var.into_disable_payout_response()?, exp_msg);
+
+    Ok(())
+}
+
+#[test]
 fn test_variant_event_ack_destructure() -> Result<()> {
     let mut exp_msg = EventAckResponse::new();
     exp_msg.calculate_checksum();
