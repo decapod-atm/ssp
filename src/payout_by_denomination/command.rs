@@ -55,6 +55,7 @@ impl PayoutByDenominationCommand {
     pub fn set_number_of_payouts(&mut self, num: u8) {
         if (0..=MAX_PAYOUTS).contains(&(num as usize)) {
             self.buf[index::NUMBER_BLOCKS] = num;
+            self.set_data_len(num.saturating_mul(PAYOUT_BLOCK as u8).saturating_add(2));
         }
     }
 
