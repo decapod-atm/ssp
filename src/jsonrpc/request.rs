@@ -9,7 +9,10 @@ use crate::{Error, Event, EventPayload, Method};
 
 impl From<&Request> for Event {
     fn from(val: &Request) -> Self {
-        let method = Method::from(val.method().unwrap_or(""));
+        let method_str = val.method().unwrap_or("");
+        let method = Method::from(method_str.to_lowercase().as_str());
+
+        log::trace!("Method: {method}, method string: {method_str}");
 
         let payload = match method {
             Method::Fail => {
@@ -125,5 +128,31 @@ impl From<&Event> for Request {
 impl From<Event> for Request {
     fn from(val: Event) -> Self {
         (&val).into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{CountryCode, PayoutDenomination, PayoutDenominationList, PayoutVec, Result};
+
+    #[test]
+    fn test_deserialize_dispense_request() -> Result<()> {
+        let req_str = r#"{"jsonrpc":"2.0","id":1,"method":"DENOMINATION_DISPENSE","params":{"denominations":[{"value":50,"number":1,"currency":"CAD"}]}}"#;
+
+        let request = serde_json::from_str::<Request>(req_str)?;
+
+        let payout_denom = PayoutDenomination::create(1, 50, CountryCode::CAD);
+        let payout_list =
+            PayoutDenominationList::create(PayoutVec::from_slice([payout_denom].as_ref())?);
+        let exp_event = DispenseEvent::create(payout_list);
+
+        assert_eq!(request.params::<DispenseEvent>()?, exp_event);
+        assert_eq!(
+            Event::from(&request),
+            Event::new(Method::Dispense, EventPayload::DispenseEvent(exp_event))
+        );
+
+        Ok(())
     }
 }
