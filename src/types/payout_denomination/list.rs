@@ -27,6 +27,11 @@ impl PayoutDenominationList {
         }
     }
 
+    /// Creates a new [PayoutDenominationList] from the provided [PayoutDenomination]s.
+    pub const fn create(denominations: PayoutVec) -> Self {
+        Self { denominations }
+    }
+
     /// Gets an iterator over the list.
     pub fn iter(&self) -> slice::Iter<PayoutDenomination> {
         self.denominations.iter()
