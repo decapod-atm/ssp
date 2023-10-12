@@ -1,6 +1,6 @@
 [package]
 name = "ssp"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2021"
 authors = ["SSP Rust Developers"]
 description = "Messages and related types for implementing the SSP/eSSP serial communication protocol"

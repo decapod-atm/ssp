@@ -162,8 +162,7 @@ impl fmt::Display for PayoutByDenominationCommand {
         write!(
             f,
             "Payout denominations: {} | ",
-            self.payout_denominations()
-                .unwrap_or(PayoutDenominationList::new())
+            self.payout_denominations().unwrap_or_default()
         )?;
         write!(f, "Payout option: {} | ", self.payout_option())?;
         write!(f, "CRC-16: 0x{:04x}", self.checksum())

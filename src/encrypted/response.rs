@@ -7,7 +7,8 @@ use crate::seed;
 
 use crate::{
     impl_default, impl_encrypted_message_ops, impl_message_from_buf, impl_response_display,
-    impl_response_ops, len, AesKey, Error, MessageOps, ResponseOps, Result, SequenceCount,
+    impl_response_ops, len, std::cmp, AesKey, Error, MessageOps, ResponseOps, Result,
+    SequenceCount,
 };
 
 use super::{encrypted_index as index, WrappedEncryptedMessage};
@@ -175,7 +176,7 @@ impl EncryptedResponse {
     }
 
     fn encrypt_data(&mut self) -> &mut [u8] {
-        let len = self.len();
+        let len = cmp::min(self.len(), len::MAX_ENCRYPTED_DATA);
         self.buf[index::LEN..len].as_mut()
     }
 
