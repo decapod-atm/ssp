@@ -174,6 +174,7 @@ impl EncryptedCommand {
             return;
         }
 
+        #[cfg(not(test))]
         let mut rng = rand::thread_rng();
 
         let start = self.packing_start();
