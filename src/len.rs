@@ -162,6 +162,10 @@ pub const ENABLE_PAYOUT_RESPONSE: usize = 6;
 pub const DISABLE_PAYOUT_COMMAND: usize = 6;
 /// DisablePayout Response full message length.
 pub const DISABLE_PAYOUT_RESPONSE: usize = 6;
+/// ProgramFirmware Command full message length.
+pub const PROGRAM_FIRMWARE_COMMAND: usize = 7;
+/// ProgramFirmware Response full message length.
+pub const PROGRAM_FIRMWARE_RESPONSE: usize = 8;
 /// Encrypted Command full message length.
 ///
 /// Because encrypted messages have variable lengths, set the static length to maximum
