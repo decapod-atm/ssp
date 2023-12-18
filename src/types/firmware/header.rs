@@ -1,4 +1,4 @@
-use core::mem;
+use core::{fmt, mem};
 
 use crate::{Error, Result};
 
@@ -45,6 +45,16 @@ impl FirmwareHeader {
     /// Gets the [FirmwareHeader] magic bytes.
     pub fn magic(&self) -> u32 {
         u32::from_be_bytes([0, self.magic[0], self.magic[1], self.magic[2]])
+    }
+
+    /// Gets the [FirmwareHeader] magic bytes as a string.
+    pub fn magic_str(&self) -> &str {
+        core::str::from_utf8(self.magic.as_ref()).unwrap_or("")
+    }
+
+    /// Gets the [FirmwareHeader] reserved bytes.
+    pub(crate) fn reserved(&self) -> u32 {
+        u32::from_be_bytes([0, self._reserved[0], self._reserved[1], self._reserved[2]])
     }
 
     /// Gets the [FirmwareHeader] file code for the firmware data.
@@ -176,6 +186,31 @@ impl<const N: usize> TryFrom<[u8; N]> for FirmwareHeader {
 
     fn try_from(val: [u8; N]) -> Result<Self> {
         val.as_ref().try_into()
+    }
+}
+
+impl fmt::Display for FirmwareHeader {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let magic = self.magic_str();
+        let reserved = self.reserved();
+        let file_code = self.file_code();
+        let ram_len = self.ram_len();
+
+        write!(f, "{{")?;
+        write!(f, r#""magic": "{magic}", "#)?;
+        write!(f, r#""reserved": {reserved}, "#)?;
+        write!(f, r#""file_code": {file_code}, "#)?;
+        write!(f, r#""ram_len": {ram_len}, "#)?;
+        write!(f, r#""data": ["#)?;
+
+        for (i, d) in self.data().iter().enumerate() {
+            if i != 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{d}")?;
+        }
+
+        write!(f, "]}}")
     }
 }
 

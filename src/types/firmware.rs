@@ -6,6 +6,8 @@ pub use dataset::*;
 pub use header::*;
 pub use ram::*;
 
+pub const FIRMWARE_ACK: u8 = 0x32;
+
 /// Parses an ITL firmware file into [FirmwareHeader], [FirmwareRam], and [FirmwareData]
 /// structures.
 #[cfg(feature = "std")]

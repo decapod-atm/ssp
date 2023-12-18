@@ -6,6 +6,10 @@ use crate::{Error, Result};
 pub const FIRMWARE_DATA_MAX: usize = u32::MAX as usize;
 /// Length of a [FirmwareData] section.
 pub const FIRMWARE_DATA_SECTION_LEN: usize = 128;
+/// Default length of a [FirmwareData] block.
+///
+/// A block consists of one or more sections.
+pub const DEFAULT_DATA_BLOCK_LEN: usize = 128;
 
 /// Represents the Firmware DATA block in the ITL firmware file.
 ///
@@ -19,9 +23,12 @@ pub const FIRMWARE_DATA_SECTION_LEN: usize = 128;
 /// The device responds with its calculated XOR-checksum byte.
 ///
 /// If there is a mismatch, abort the firmware update, and retry.
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FirmwareData {
     block: Vec<u8>,
     index: usize,
+    block_len: usize,
 }
 
 impl FirmwareData {
@@ -30,6 +37,7 @@ impl FirmwareData {
         Self {
             block: Vec::new(),
             index: 0,
+            block_len: DEFAULT_DATA_BLOCK_LEN,
         }
     }
 
@@ -38,9 +46,7 @@ impl FirmwareData {
     /// Returns:
     /// - `Ok(FirmwareData)` on success
     /// - `Err(Error)` if `val` length exceeds [FIRMWARE_DATA_MAX].
-    // TODO: should we do checks for valid machine instructions? Are there specifications available
-    // for the ITL instruction set used on their devices?
-    pub fn create(val: &[u8]) -> Result<Self> {
+    pub fn create(val: &[u8], block_len: usize) -> Result<Self> {
         let len = val.len();
         if len > FIRMWARE_DATA_MAX {
             Err(Error::Firmware(format!(
@@ -50,6 +56,7 @@ impl FirmwareData {
             Ok(Self {
                 block: val.into(),
                 index: 0,
+                block_len,
             })
         }
     }
@@ -87,9 +94,29 @@ impl FirmwareData {
         }
     }
 
+    /// Gets the block length returned by the RAM programming command.
+    pub fn block_len(&self) -> usize {
+        self.block_len
+    }
+
+    /// Sets the block length returned by the RAM programming command.
+    pub fn set_block_len(&mut self, len: u16) {
+        self.block_len = len as usize;
+    }
+
     /// Gets the current index in the [FirmwareData] block.
     pub const fn index(&self) -> usize {
         self.index
+    }
+
+    /// Gets the length of the [FirmwareData] buffer.
+    pub fn len(&self) -> usize {
+        self.block.len()
+    }
+
+    /// Gets whether the [FirmwareData] buffer is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
@@ -97,7 +124,7 @@ impl TryFrom<&[u8]> for FirmwareData {
     type Error = Error;
 
     fn try_from(val: &[u8]) -> Result<Self> {
-        Self::create(val)
+        Self::create(val, DEFAULT_DATA_BLOCK_LEN)
     }
 }
 
@@ -129,7 +156,7 @@ mod tests {
         let mut index = 0;
         let exp_sections = 32;
 
-        let mut data_block = FirmwareData::create(&exp_data_buf)?;
+        let mut data_block = FirmwareData::create(&exp_data_buf, FIRMWARE_DATA_SECTION_LEN)?;
 
         while let Some(section) = data_block.next_section() {
             assert_eq!(section, &exp_data_buf[index..index + section.len()]);
@@ -150,7 +177,7 @@ mod tests {
         let mut index = 0;
         let exp_sections = 2;
 
-        let mut data_block = FirmwareData::create(&exp_data_buf)?;
+        let mut data_block = FirmwareData::create(&exp_data_buf, FIRMWARE_DATA_SECTION_LEN)?;
 
         while let Some(section) = data_block.next_section() {
             assert_eq!(section, &exp_data_buf[index..index + section.len()]);
@@ -169,7 +196,7 @@ mod tests {
         let bad_data_buf = vec![0xff; FIRMWARE_DATA_MAX + 1];
         let bad_slice: &[u8] = bad_data_buf.as_ref();
 
-        assert!(FirmwareData::create(bad_slice).is_err());
+        assert!(FirmwareData::create(bad_slice, FIRMWARE_DATA_SECTION_LEN).is_err());
         assert!(FirmwareData::try_from(bad_slice).is_err());
     }
 }

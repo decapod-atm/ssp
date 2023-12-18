@@ -19,6 +19,8 @@ pub const FIRMWARE_RAM_SECTION_LEN: usize = 128;
 /// An XOR-checksum is calculated over each byte in the [FirmwareRam] block. At the end of
 /// transmission, the device will return its XOR-checksum byte, which should be checked against
 /// the local checksum. If there is a mismatch, abort the firmware update, and retry.
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FirmwareRam {
     block: Vec<u8>,
     index: usize,
