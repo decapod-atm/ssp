@@ -93,6 +93,16 @@ impl FirmwareRam {
     pub const fn index(&self) -> usize {
         self.index
     }
+
+    /// Gets the length of the [FirmwareRam] buffer.
+    pub fn len(&self) -> usize {
+        self.block.len()
+    }
+
+    /// Gets whether the [FirmwareRam] buffer is empty.
+    pub fn is_empty(&self) -> bool {
+        self.block.is_empty()
+    }
 }
 
 impl TryFrom<&[u8]> for FirmwareRam {
