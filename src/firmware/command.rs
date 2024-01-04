@@ -14,6 +14,7 @@ mod index {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProgramFirmwareCode {
     Ram = 0x03,
+    Currency = 0x07,
     Reserved(u8),
 }
 
@@ -21,6 +22,7 @@ impl From<u8> for ProgramFirmwareCode {
     fn from(val: u8) -> Self {
         match val {
             0x03 => Self::Ram,
+            0x07 => Self::Currency,
             _ => Self::Reserved(val),
         }
     }
@@ -30,6 +32,7 @@ impl From<&ProgramFirmwareCode> for u8 {
     fn from(val: &ProgramFirmwareCode) -> Self {
         match val {
             ProgramFirmwareCode::Ram => 0x03,
+            ProgramFirmwareCode::Currency => 0x07,
             ProgramFirmwareCode::Reserved(code) => *code,
         }
     }
@@ -62,6 +65,19 @@ impl ProgramFirmwareCommand {
         msg.init();
         msg.set_command(MessageType::ProgramFirmware);
         msg.set_firmware_code(ProgramFirmwareCode::Ram);
+
+        msg
+    }
+
+    /// Creates a new [SyncCommand] message with the provided [ProgramFirmwareCode].
+    pub fn create(code: ProgramFirmwareCode) -> Self {
+        let mut msg = Self {
+            buf: [0u8; PROGRAM_FIRMWARE_COMMAND],
+        };
+
+        msg.init();
+        msg.set_command(MessageType::ProgramFirmware);
+        msg.set_firmware_code(code);
 
         msg
     }
