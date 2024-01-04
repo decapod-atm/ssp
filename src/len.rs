@@ -170,6 +170,12 @@ pub const PROGRAM_FIRMWARE_RESPONSE: usize = 8;
 pub const FIRMWARE_HEADER_COMMAND: usize = 133;
 /// FirmwareHeader Response full message length.
 pub const FIRMWARE_HEADER_RESPONSE: usize = 6;
+/// DownloadDataPacket Command full message length.
+pub const DOWNLOAD_DATA_PACKET_COMMAND: usize = 139;
+/// DownloadDataPacket Response full message length.
+pub const DOWNLOAD_DATA_PACKET_RESPONSE: usize = 6;
+/// Maximum size of a download data packet "line".
+pub const DATA_PACKET_LINE: usize = 128;
 /// Encrypted Command full message length.
 ///
 /// Because encrypted messages have variable lengths, set the static length to maximum

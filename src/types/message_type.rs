@@ -106,6 +106,8 @@ pub enum MessageType {
     SetEncryptionKey = 0x60,
     /// SSP Encryption Reset to Default - resets the fixed encryption key to the default value.
     EncryptionReset = 0x61,
+    /// SSP Download Data Packet - used for remote update of validator devices.
+    DownloadDataPacket = 0x74,
     /// Encrypted (eSSP) message - an encrypted version of another message.
     Encrypted = 0x7e,
     /// Reserved for future use.
@@ -160,6 +162,7 @@ impl From<u8> for MessageType {
             0x5c => Self::EnablePayout,
             0x60 => Self::SetEncryptionKey,
             0x61 => Self::EncryptionReset,
+            0x74 => Self::DownloadDataPacket,
             0x7e => Self::Encrypted,
             _ => Self::Reserved,
         }
@@ -219,6 +222,7 @@ impl From<MessageType> for &'static str {
             MessageType::EnablePayout => "EnablePayout",
             MessageType::SetEncryptionKey => "SetEncryptionKey",
             MessageType::EncryptionReset => "EncryptionReset",
+            MessageType::DownloadDataPacket => "DownloadDataPacket",
             MessageType::Encrypted => "Encrypted",
             MessageType::Reserved => "Reserved",
         }

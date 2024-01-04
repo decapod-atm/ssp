@@ -8,11 +8,11 @@ mod index {
     pub const FIRMWARE_HEADER_END: usize = 131;
 }
 
-/// ProgramFirmware - Command (0x0B)
+/// FirmwareHeader - Command
 ///
-/// This two byte command prepares the unit for firmware programming.
+/// Sends the firmware header to the SSP device.
 ///
-/// The `FirmwareCode` field defines the type of programming.
+/// Only used for pre-2017 devices.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FirmwareHeaderCommand {
@@ -21,6 +21,15 @@ pub struct FirmwareHeaderCommand {
 
 impl FirmwareHeaderCommand {
     /// Creates a new [FirmwareHeaderCommand] message.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # use ssp;
+    /// # use ssp::MessageOps;
+    /// let header_cmd = ssp::FirmwareHeaderCommand::new();
+    /// assert_eq!(header_cmd.data_len(), 128);
+    /// ```
     pub fn new() -> Self {
         let mut msg = Self {
             buf: [0u8; FIRMWARE_HEADER_COMMAND],
