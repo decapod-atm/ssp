@@ -163,7 +163,7 @@ pub const DISABLE_PAYOUT_COMMAND: usize = 6;
 /// DisablePayout Response full message length.
 pub const DISABLE_PAYOUT_RESPONSE: usize = 6;
 /// ProgramFirmware Command full message length.
-pub const PROGRAM_FIRMWARE_COMMAND: usize = 7;
+pub const PROGRAM_FIRMWARE_COMMAND: usize = 8;
 /// ProgramFirmware Response full message length.
 pub const PROGRAM_FIRMWARE_RESPONSE: usize = 8;
 /// FirmwareHeader Command full message length.

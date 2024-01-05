@@ -5,6 +5,7 @@ use crate::{
 
 mod index {
     pub const FIRMWARE_CODE: usize = 4;
+    pub const FIRMWARE_TYPE: usize = 5;
 }
 
 /// Represents the type of programming the unit expects.
@@ -44,6 +45,37 @@ impl From<ProgramFirmwareCode> for u8 {
     }
 }
 
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProgramFirmwareType {
+    Currency = 0x07,
+    Reserved(u8),
+}
+
+impl From<u8> for ProgramFirmwareType {
+    fn from(val: u8) -> Self {
+        match val {
+            0x07 => Self::Currency,
+            _ => Self::Reserved(val),
+        }
+    }
+}
+
+impl From<&ProgramFirmwareType> for u8 {
+    fn from(val: &ProgramFirmwareType) -> Self {
+        match val {
+            ProgramFirmwareType::Currency => 0x07,
+            ProgramFirmwareType::Reserved(code) => *code,
+        }
+    }
+}
+
+impl From<ProgramFirmwareType> for u8 {
+    fn from(val: ProgramFirmwareType) -> Self {
+        (&val).into()
+    }
+}
+
 /// ProgramFirmware - Command (0x0B)
 ///
 /// This two byte command prepares the unit for firmware programming.
@@ -65,12 +97,13 @@ impl ProgramFirmwareCommand {
         msg.init();
         msg.set_command(MessageType::ProgramFirmware);
         msg.set_firmware_code(ProgramFirmwareCode::Ram);
+        msg.set_firmware_type(ProgramFirmwareType::Currency);
 
         msg
     }
 
     /// Creates a new [SyncCommand] message with the provided [ProgramFirmwareCode].
-    pub fn create(code: ProgramFirmwareCode) -> Self {
+    pub fn create(code: ProgramFirmwareCode, fw_type: ProgramFirmwareType) -> Self {
         let mut msg = Self {
             buf: [0u8; PROGRAM_FIRMWARE_COMMAND],
         };
@@ -78,6 +111,7 @@ impl ProgramFirmwareCommand {
         msg.init();
         msg.set_command(MessageType::ProgramFirmware);
         msg.set_firmware_code(code);
+        msg.set_firmware_type(fw_type);
 
         msg
     }
@@ -107,6 +141,33 @@ impl ProgramFirmwareCommand {
     /// ```
     pub fn set_firmware_code(&mut self, code: ProgramFirmwareCode) {
         self.buf[index::FIRMWARE_CODE] = code.into();
+    }
+
+    /// Gets the [FirmwareType] for the type of programming the unit expects.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # use ssp;
+    /// let fw_cmd = ssp::ProgramFirmwareCommand::new();
+    /// assert_eq!(fw_cmd.firmware_type(), ssp::ProgramFirmwareType::Currency);
+    /// ```
+    pub fn firmware_type(&self) -> ProgramFirmwareType {
+        self.buf[index::FIRMWARE_TYPE].into()
+    }
+
+    /// Sets the [ProgramFirmwareType] for the type of programming the unit expects.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # use ssp;
+    /// let mut fw_cmd = ssp::ProgramFirmwareCommand::new();
+    /// fw_cmd.set_firmware_type(ssp::ProgramFirmwareType::Ram);
+    /// assert_eq!(fw_cmd.firmware_type(), ssp::ProgramFirmwareType::Currency);
+    /// ```
+    pub fn set_firmware_type(&mut self, fw_type: ProgramFirmwareType) {
+        self.buf[index::FIRMWARE_TYPE] = fw_type.into();
     }
 }
 
