@@ -260,7 +260,7 @@ pub struct Event {
 
 impl Event {
     /// Creates a new [Event] from the provided `method` and `data`.
-    pub fn new(method: Method, payload: EventPayload) -> Self {
+    pub const fn new(method: Method, payload: EventPayload) -> Self {
         Self { method, payload }
     }
 
